@@ -16,7 +16,6 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -32,10 +31,8 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.e("ggg", "intent 1= " + intent);
             if (ACCROS_INTENT.equals(intent.getAction())) {
                 if (Process.myUserHandle().hashCode() == 0) {
-                    Log.e("ggg", "intent 2= " + intent);
                     setDisableComponent(context, getClass(), true);
                 }
             }
@@ -70,7 +67,6 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 
         if (myUser.hashCode() == 0) {
             for (UserHandle uh : userManager1.getUserProfiles()) {
-                Log.e("gggg", "uh = " + uh.hashCode() + "  myuser =" + myUser.hashCode());
                 if (uh.hashCode() != myUser.hashCode()) {
                     multiUser = false;
 //                    launcherApps.startMainActivity(new ComponentName(this, getClass()), uh, null, null);
@@ -81,18 +77,11 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (manager.isProfileOwnerApp(getApplicationContext().getPackageName())) {
-//                UserManager userManager = (UserManager) this.getSystemService(Context.USER_SERVICE);
-                //                    Bundle bundle = userManager.getApplicationRestrictions(this.getPackageName());
-//                    for (String key : bundle.keySet()) {
-//                        Log.e("ggg 11", "key = " + key + "  value = " + bundle.get(key));
-//                    }
-
                 Intent intent = new Intent(this, PermissionManager.class);
                 startActivity(intent);
 
             } else {
                 if (!multiUser) {
-                    Log.e("ggg", "time start = ");
                     provisionManagedProfile(this);
 
                     try {
@@ -175,7 +164,6 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
             return;
         }
 
-        Log.e("ggg", "xxx " + disable);
         if (disable) {
             context.getPackageManager().setComponentEnabledSetting(new ComponentName(context, cls),
                     PackageManager.COMPONENT_ENABLED_STATE_DISABLED

@@ -30,4 +30,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+    <LinearLayout
+            android:id="@+id/vpn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+        <EditText
+                android:id="@+id/input_pkg_vpn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="input_pkg_vpn"
+                android:inputType="text"
+                android:layout_weight="1" />
+
+        <Button
+                android:id="@+id/set_vpn"
+                android:text="设置 VPN"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2" />
+    </LinearLayout>
+
 </LinearLayout>
