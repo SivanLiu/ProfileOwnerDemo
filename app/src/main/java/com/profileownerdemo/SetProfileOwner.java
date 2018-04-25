@@ -7,18 +7,21 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import java.util.List;
 
 public class SetProfileOwner extends AppCompatActivity implements View.OnClickListener {
 
@@ -77,13 +80,13 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (manager.isProfileOwnerApp(getApplicationContext().getPackageName())) {
-                Intent intent = new Intent(this, PermissionManager.class);
-                startActivity(intent);
-
+                startProfileOWnerDesktop();
+//                Intent intent = new Intent(this, PermissionManager.class);
+//                startActivity(intent);
             } else {
                 if (!multiUser) {
                     provisionManagedProfile(this);
-
+                    startProfileOWnerDesktop();
                     try {
                         Thread.sleep(2000);
                         setDisableComponent(this, getClass(), true);
@@ -175,22 +178,19 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-    /* Checks if external storage is available for read and write */
-    public boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+    private void startProfileOWnerDesktop() {
+        Intent intent = new Intent(this, ProfileOwnerDesktop.class);
+        startActivity(intent);
     }
 
-    /* Checks if external storage is available to at least read */
-    public boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            return true;
+    public void getInstalledApps() {
+        PackageManager pm = this.getPackageManager();
+        List<ApplicationInfo> packages = pm
+                .getInstalledApplications(PackageManager.GET_META_DATA);
+
+        for (ApplicationInfo packageInfo : packages) {
+            Log.e("ggg", "packageNames = " + packageInfo.packageName + "\n" + "  " +
+                    "label = " + pm.getApplicationLabel(packageInfo).toString() + " \n" + "");
         }
-        return false;
     }
 }

@@ -29,6 +29,9 @@ import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DENIE
 import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.content.Intent.ACTION_VIEW;
 
+/**
+ * @author sivan
+ */
 public class PermissionManager extends AppCompatActivity implements View.OnClickListener {
     private Button disableCmaera;
     private DevicePolicyManager mDpm;
@@ -196,6 +199,8 @@ public class PermissionManager extends AppCompatActivity implements View.OnClick
                 Toast.makeText(getApplicationContext(), "write state = " + write_state + " read_state =" + read_state, Toast.LENGTH_SHORT).show();
                 break;
             case R.id.set_vpn:
+                Intent intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+                this.startActivity(intent);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     String vpn = mDpm.getAlwaysOnVpnPackage(mAdminComponentName);
                     Log.d("sivan", "vpn packageName = " + vpn);

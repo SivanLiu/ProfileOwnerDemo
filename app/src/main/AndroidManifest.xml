@@ -19,27 +19,27 @@
                 android:name=".SetProfileOwner"
                 android:exported="true">
             <intent-filter>
-
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
+        <!-- <activity-alias -->
+        <!-- android:name="com.ggg.alias" -->
+        <!-- android:targetActivity=".SetProfileOwner" -->
+        <!-- android:label="Samples Alias" -->
+        <!-- android:enabled="true"> -->
 
-        <!--<activity-alias-->
-        <!--android:name="com.ggg.alias"-->
-        <!--android:targetActivity=".SetProfileOwner"-->
-        <!--android:label="Samples Alias"-->
-        <!--android:enabled="true">-->
 
-        <!--<intent-filter>-->
-        <!--<action android:name="android.intent.action.MAIN" />-->
-        <!--<category android:name="android.intent.category.LAUNCHER" />-->
-        <!--</intent-filter>-->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.MAIN" /> -->
+        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+        <!-- </intent-filter> -->
 
-        <!--</activity-alias>-->
-        <activity android:name=".PermissionManager"></activity>
+
+        <!-- </activity-alias> -->
+        <activity android:name=".PermissionManager" />
 
         <receiver
                 android:name=".BasicDeviceAdminReceiver"
@@ -55,6 +55,7 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name=".ProfileOwnerDesktop"></activity>
     </application>
 
 </manifest>
