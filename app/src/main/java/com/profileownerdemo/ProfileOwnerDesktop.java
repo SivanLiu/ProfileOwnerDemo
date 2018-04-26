@@ -1,6 +1,9 @@
 package com.profileownerdemo;
 
+import com.profile.ui.Main2Activity;
+
 import android.app.Application;
+import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -22,13 +25,14 @@ public class ProfileOwnerDesktop extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_owenr_desktop);
+        Intent intent = new Intent(this, Main2Activity.class);
+        startActivity(intent);
         try {
             Class<?> cls = IPackageManager.class;
             Method getApplicationInfo = cls.getDeclaredMethod("getApplicationInfo", String.class, int.class, int.class);
             getApplicationInfo.setAccessible(true);
             List<Application> applications = (List<Application>) getApplicationInfo.invoke(cls, "com.github.shadowsocks", 0, 0);
 
-            PackageManager packageManager = (PackageManager)this.getSystemService(PackageManager.);
             for (Application application : applications) {
                 Log.e("ggg", "appliaction = " + application.getPackageName());
             }

@@ -55,7 +55,8 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".ProfileOwnerDesktop"></activity>
+        <activity android:name=".ProfileOwnerDesktop" />
+        <activity android:name="com.profile.ui.Main2Activity"></activity>
     </application>
 
 </manifest>

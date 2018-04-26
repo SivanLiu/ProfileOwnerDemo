@@ -86,7 +86,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
             } else {
                 if (!multiUser) {
                     provisionManagedProfile(this);
-                    startProfileOWnerDesktop();
+//                    startProfileOWnerDesktop();
                     try {
                         Thread.sleep(2000);
                         setDisableComponent(this, getClass(), true);
