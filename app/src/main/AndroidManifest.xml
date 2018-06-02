@@ -56,7 +56,8 @@
         </receiver>
 
         <activity android:name=".ProfileOwnerDesktop" />
-        <activity android:name="com.profile.ui.Main2Activity"></activity>
+        <activity android:name="com.profile.ui.Main2Activity" />
+        <activity android:name="com.island.Main3Activity"></activity>
     </application>
 
 </manifest>

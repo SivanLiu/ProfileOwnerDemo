@@ -20,5 +20,6 @@
     <string name="restrictions_set">Restrictions set.</string>
     <string name="activity_not_found">No app can handle this intent.</string>
     <string name="cleared">Cleared.</string>
+    <string name="startApp">StartApp</string>
 
 </resources>

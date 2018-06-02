@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -23,9 +24,12 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import static android.content.Intent.ACTION_USER_INITIALIZE;
+
 public class SetProfileOwner extends AppCompatActivity implements View.OnClickListener {
 
     private Button button;
+    private Button startApp;
     private static final int REQUEST_PROVISION_MANAGED_PROFILE = 1;
 
     private static final String ACCROS_INTENT = "com.disable.comp";
@@ -34,10 +38,17 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.e("ggg", "disable user = "+Process.myUserHandle().toString());
             if (ACCROS_INTENT.equals(intent.getAction())) {
-                if (Process.myUserHandle().hashCode() == 0) {
-                    setDisableComponent(context, getClass(), true);
+                if (Process.myUserHandle().hashCode() != 0) {
+                    try {
+                        setDisableComponent(context, Class.forName("com.profileownerdemo.SetProfileOwner"), true);
+                    } catch (ClassNotFoundException e) {
+                        Log.e("ggg", " "+e.getMessage());
+                    }
                 }
+            } else if (ACTION_USER_INITIALIZE.equals(intent.getAction())) {
+                Log.e("ggg", "userHandle = " + Process.myUserHandle().hashCode());
             }
         }
     };
@@ -47,12 +58,17 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.e("ggg", "class = "+getClass());
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACCROS_INTENT);
+        intentFilter.addAction(ACTION_USER_INITIALIZE);
         this.registerReceiver(broadcastReceiver, intentFilter);
 
         button = findViewById(R.id.setUp);
         button.setOnClickListener(this);
+
+        startApp = findViewById(R.id.startApp);
+        startApp.setOnClickListener(this);
 
         DevicePolicyManager manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 
@@ -80,7 +96,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (manager.isProfileOwnerApp(getApplicationContext().getPackageName())) {
-                startProfileOWnerDesktop();
+//                startProfileOWnerDesktop();
 //                Intent intent = new Intent(this, PermissionManager.class);
 //                startActivity(intent);
             } else {
@@ -89,7 +105,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 //                    startProfileOWnerDesktop();
                     try {
                         Thread.sleep(2000);
-                        setDisableComponent(this, getClass(), true);
+//                        setDisableComponent(this, getClass(), true);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -107,6 +123,18 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                     return;
                 }
                 provisionManagedProfile(this);
+                break;
+            case R.id.startApp:
+                UserManager userManager1 = (UserManager) this.getSystemService(USER_SERVICE);
+                UserHandle destUser;
+                for (UserHandle currentUser : userManager1.getUserProfiles()) {
+                    if (currentUser.hashCode() != 0) {
+                        destUser = currentUser;
+                        Log.e("ggg", "startApp " + currentUser.toString());
+                        startLauncherActivity(this, "com.android.contacts", destUser);
+                        return;
+                    }
+                }
                 break;
             default:
                 break;
@@ -192,5 +220,22 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
             Log.e("ggg", "packageNames = " + packageInfo.packageName + "\n" + "  " +
                     "label = " + pm.getApplicationLabel(packageInfo).toString() + " \n" + "");
         }
+    }
+
+    public static boolean startLauncherActivity(Context context, String packageName, UserHandle userHandle) {
+        LauncherApps launcherApps = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            launcherApps = (LauncherApps) context.getSystemService(LAUNCHER_APPS_SERVICE);
+        }
+
+        if (launcherApps != null) {
+            List<LauncherActivityInfo> list = launcherApps.getActivityList(packageName, userHandle);
+
+            if (null != list && !list.isEmpty()) {
+                launcherApps.startMainActivity((list.get(0)).getComponentName(), userHandle, null, null);
+                return true;
+            }
+        }
+        return false;
     }
 }

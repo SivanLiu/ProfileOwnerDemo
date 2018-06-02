@@ -4,6 +4,11 @@ import com.profileownerdemo.R;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.LauncherActivityInfo;
+import android.content.pm.LauncherApps;
+import android.os.Build;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +19,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.Context.LAUNCHER_APPS_SERVICE;
 
 /**
  * Created by lyg on 2018/4/25.
@@ -86,13 +93,40 @@ public class MyAdapter extends RecyclerView.Adapter {
                 @Override
                 public void onClick(View view) {
                     ItemBean bean = mDataSet.get(getPosition());
-                    Log.e("ggg", " id = "+bean.getText());
+                    Log.e("ggg", " id = " + bean.getText());
                     Intent intent = Main2Activity.getContext().getPackageManager().getLaunchIntentForPackage(bean.getText());
                     Main2Activity.getContext().startActivity(intent);
 
+                    UserManager devicePolicyManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+                    UserHandle mainUser = null;
+                    for (UserHandle userHandle : devicePolicyManager.getUserProfiles()) {
+                        if (userHandle.hashCode() == 0) {
+                            mainUser = userHandle;
+                            Log.e("ggg", "userHandle = "+userHandle.toString());
+                            startLauncherActivity(mContext, "com.android.calendar", mainUser);
+                            return;
+                        }
+                    }
                 }
             });
         }
+    }
+
+    public static boolean startLauncherActivity(Context context, String packageName, UserHandle userHandle) {
+        LauncherApps launcherApps = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            launcherApps = (LauncherApps) context.getSystemService(LAUNCHER_APPS_SERVICE);
+        }
+
+        if (launcherApps != null) {
+            List<LauncherActivityInfo> list = launcherApps.getActivityList(packageName, userHandle);
+
+            if (null != list && !list.isEmpty()) {
+                launcherApps.startMainActivity((list.get(0)).getComponentName(), userHandle, null, null);
+                return true;
+            }
+        }
+        return false;
     }
 }
 
