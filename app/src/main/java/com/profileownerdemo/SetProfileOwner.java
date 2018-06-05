@@ -22,6 +22,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import static android.content.Intent.ACTION_USER_INITIALIZE;
@@ -38,15 +40,17 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.e("ggg", "disable user = "+Process.myUserHandle().toString());
+            Log.e("ggg", "disable user = " + Process.myUserHandle().toString());
             if (ACCROS_INTENT.equals(intent.getAction())) {
-                if (Process.myUserHandle().hashCode() != 0) {
+//                if (Process.myUserHandle().hashCode() != 0) {
                     try {
-                        setDisableComponent(context, Class.forName("com.profileownerdemo.SetProfileOwner"), true);
+                        context.getPackageManager().setComponentEnabledSetting(new ComponentName(context,  Class.forName("com.profileownerdemo.SetProfileOwner")),
+                                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                                , PackageManager.DONT_KILL_APP);
                     } catch (ClassNotFoundException e) {
-                        Log.e("ggg", " "+e.getMessage());
+                        Log.e("ggg", " " + e.getMessage());
                     }
-                }
+//                }
             } else if (ACTION_USER_INITIALIZE.equals(intent.getAction())) {
                 Log.e("ggg", "userHandle = " + Process.myUserHandle().hashCode());
             }
@@ -58,7 +62,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.e("ggg", "class = "+getClass());
+        Log.e("ggg", "class = " + getClass());
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACCROS_INTENT);
         intentFilter.addAction(ACTION_USER_INITIALIZE);
@@ -131,10 +135,11 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                     if (currentUser.hashCode() != 0) {
                         destUser = currentUser;
                         Log.e("ggg", "startApp " + currentUser.toString());
-                        startLauncherActivity(this, "com.android.contacts", destUser);
+                        startLauncherActivity(this, "com.profileownerdemo.SetProfileOwner", destUser);
                         return;
                     }
                 }
+
                 break;
             default:
                 break;
