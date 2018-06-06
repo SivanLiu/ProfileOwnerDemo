@@ -4,41 +4,28 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.util.Log;
+
+import static com.profileownerdemo.Util.LAUNCH_MAIN_ACTIVITY;
 
 /**
  * Created by lyg on 2018/6/4.
  */
 public class HiddenBroadcastReceiver extends BroadcastReceiver {
-    private static final String ACCROS_INTENT = "com.disable.icon";
+    private static final ComponentName LAUNCHER_COMPONENT_NAME = new ComponentName(
+            "com.profileownerdemo", "com.profileownerdemo.SetProfileOwner");
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e("ggg", "intent = "+intent.getAction());
-        if (ACCROS_INTENT.equals(intent.getAction())) {
-            try {
-                setDisableComponent(context, Class.forName("com.profileownerdemo.SetProfileOwner"), false);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+        boolean startActivity = intent.getBooleanExtra(LAUNCH_MAIN_ACTIVITY, false);
+        Log.e("ggg", "intent = " + intent.getAction() + "  launch_main = " + startActivity);
+        Util.setDisableComponent(context, LAUNCHER_COMPONENT_NAME, false);
 
-    private void setDisableComponent(Context context, Class<?> cls, boolean disable) {
-        int state = context.getPackageManager().getComponentEnabledSetting(new ComponentName(context, cls));
-        if (PackageManager.COMPONENT_ENABLED_STATE_DISABLED == state) {
-            return;
-        }
-
-        if (disable) {
-            context.getPackageManager().setComponentEnabledSetting(new ComponentName(context, cls),
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                    , PackageManager.DONT_KILL_APP);
-        } else {
-            context.getPackageManager().setComponentEnabledSetting(new ComponentName(context, cls),
-                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                    , PackageManager.DONT_KILL_APP);
+        if (startActivity) {
+            Log.e("ggg", "start main");
+            Intent start = new Intent();
+            start.setComponent(LAUNCHER_COMPONENT_NAME);
+            context.startActivity(start);
         }
     }
 }

@@ -7,7 +7,7 @@
         tools:context="com.profileownerdemo.SetProfileOwner">
 
     <Button
-            android:id="@+id/setUp"
+            android:id="@+id/set_up_profile"
             android:text="SetProfile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

@@ -3,10 +3,15 @@ package com.profileownerdemo;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherActivityInfo;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
+import android.os.UserHandle;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -24,6 +29,9 @@ import static android.os.Build.VERSION.SDK_INT;
  * Created by lyg on 4/18/18.
  */
 public class Util {
+    public static final String ACCROS_INTENT = "com.disable.icon";
+    public static final String LAUNCH_MAIN_ACTIVITY= "launch_main_activity";
+
     public synchronized ArrayList<String> getStorageDirectories(Activity activity) {
         // Final set of paths
         final ArrayList<String> rv = new ArrayList<>();
@@ -141,5 +149,40 @@ public class Util {
 
     public static boolean canListFiles(File f) {
         return f.canRead() && f.isDirectory();
+    }
+
+    public static void setDisableComponent(Context context, ComponentName componentName, boolean disable) {
+        if (disable) {
+            context.getPackageManager().setComponentEnabledSetting(componentName,
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                    , PackageManager.DONT_KILL_APP);
+        } else {
+            context.getPackageManager().setComponentEnabledSetting(componentName,
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                    , PackageManager.DONT_KILL_APP);
+        }
+    }
+
+    public static boolean startLauncherActivity(LauncherApps launcherApps, String packageName, UserHandle userHandle) {
+        if (launcherApps != null) {
+            List<LauncherActivityInfo> list = launcherApps.getActivityList(packageName, userHandle);
+
+            if (null != list && !list.isEmpty()) {
+                launcherApps.startMainActivity((list.get(0)).getComponentName(), userHandle, null, null);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void getInstalledApps(Context context) {
+        PackageManager pm = context.getPackageManager();
+        List<ApplicationInfo> packages = pm
+                .getInstalledApplications(PackageManager.GET_META_DATA);
+
+        for (ApplicationInfo packageInfo : packages) {
+            Log.e("ggg", "packageNames = " + packageInfo.packageName + "\n" + "  " +
+                    "label = " + pm.getApplicationLabel(packageInfo).toString() + " \n" + "");
+        }
     }
 }
