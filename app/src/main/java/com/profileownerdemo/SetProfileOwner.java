@@ -22,7 +22,7 @@ import android.widget.Toast;
 import static android.app.admin.DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT;
 import static android.app.admin.DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED;
 import static com.profileownerdemo.Util.ACCROS_INTENT;
-import static com.profileownerdemo.Util.LAUNCH_MAIN_ACTIVITY;
+import static com.profileownerdemo.Util.PASS_DATA;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class SetProfileOwner extends AppCompatActivity implements View.OnClickListener {
@@ -35,6 +35,10 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     private DevicePolicyManager manager = null;
     private static LauncherApps launcherApps = null;
     private UserManager userManager = null;
+
+    String method = "isSuccess";
+    String uri = "content://shuttle.provider";
+    Bundle bundle = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +54,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 //        filter.addDataType("image/jpeg");
 //        filter.addDataType();
         // This is how you can register an IntentFilter as allowed pattern of Intent forwarding
-        if(Process.myUserHandle().hashCode() !=0){
+        if (Process.myUserHandle().hashCode() != 0) {
             manager.addCrossProfileIntentFilter(BasicDeviceAdminReceiver.getComponentName(this),
                     filter, FLAG_MANAGED_CAN_ACCESS_PARENT | FLAG_PARENT_CAN_ACCESS_MANAGED);
         }
@@ -93,14 +97,19 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 UserHandle destUser;
                 if (multiUser) {
                     Log.e("ggg", "disabled ");
-                    Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, true);
+//                    Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, true);
                     for (UserHandle currentUser : userManager.getUserProfiles()) {
+                        if (currentUser.hashCode() == 0) {
+                            Log.e("ggg", "send  1 " + Util.isMainActivityAlive(this, "com.profileownerdemo.OnePiexlActivity"));
+                            Intent intent = new Intent(ACCROS_INTENT);
+                            intent.putExtra(PASS_DATA, "one start .....");
+                            this.sendBroadcast(new Intent(ACCROS_INTENT));
+
+                            Log.e("ggg", "send  2 " + currentUser.toString());
+                        }
+
                         if (currentUser.hashCode() != 0) {
                             destUser = currentUser;
-                            Intent intent = new Intent(ACCROS_INTENT);
-                            intent.putExtra(LAUNCH_MAIN_ACTIVITY, true);
-                            this.sendBroadcast(new Intent(ACCROS_INTENT));
-                            Log.e("ggg", "send  " + currentUser.toString());
 //                            Util.startLauncherActivity(launcherApps, this.getPackageName(), destUser);
                             return;
                         }
@@ -128,6 +137,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.e("ggg", "receive intent = " + data.getAction() + "  currentUser : " + Process.myUserHandle().toString());
         if (requestCode == REQUEST_PROVISION_MANAGED_PROFILE) {
             if (resultCode == Activity.RESULT_OK) {
                 Toast.makeText(this, "Provisioning done.", Toast.LENGTH_SHORT).show();

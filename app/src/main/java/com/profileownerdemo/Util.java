@@ -3,6 +3,7 @@ package com.profileownerdemo;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -30,7 +31,9 @@ import static android.os.Build.VERSION.SDK_INT;
  */
 public class Util {
     public static final String ACCROS_INTENT = "com.disable.icon";
-    public static final String LAUNCH_MAIN_ACTIVITY= "launch_main_activity";
+    public static final String LAUNCH_MAIN_ACTIVITY = "launch_main_activity";
+    public static final String SECOND_INTENT = "com.second.intent";
+    public static final String PASS_DATA = "data";
 
     public synchronized ArrayList<String> getStorageDirectories(Activity activity) {
         // Final set of paths
@@ -184,5 +187,18 @@ public class Util {
             Log.e("ggg", "packageNames = " + packageInfo.packageName + "\n" + "  " +
                     "label = " + pm.getApplicationLabel(packageInfo).toString() + " \n" + "");
         }
+    }
+
+    public static boolean isMainActivityAlive(Context context, String activityName) {
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(100);
+        for (ActivityManager.RunningTaskInfo info : list) {
+            // 注意这里的 topActivity 包含 packageName和className，可以打印出来看看
+            if (info.topActivity.toString().equals(activityName) || info.baseActivity.toString().equals(activityName)) {
+                Log.e("ggg", info.topActivity.getPackageName() + " info.baseActivity.getPackageName()=" + info.baseActivity.getPackageName());
+                return true;
+            }
+        }
+        return false;
     }
 }

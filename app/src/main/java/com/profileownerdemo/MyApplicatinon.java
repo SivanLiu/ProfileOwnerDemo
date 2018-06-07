@@ -16,12 +16,12 @@ public class MyApplicatinon extends Application {
         super.onCreate();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACCROS_INTENT);
-        this.registerReceiver(hiddenBroadcastReceiver, intentFilter);
+//        this.registerReceiver(hiddenBroadcastReceiver, intentFilter);
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
-        this.unregisterReceiver(hiddenBroadcastReceiver);
+//        this.unregisterReceiver(hiddenBroadcastReceiver);
     }
 }

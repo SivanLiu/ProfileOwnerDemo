@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.profileownerdemo">
 
+    <uses-feature
+            android:name="android.software.device_admin"
+            android:required="true" />
+    <uses-feature
+            android:name="android.software.managed_users"
+            android:required="true" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -21,9 +28,14 @@
         <activity android:name=".SetProfileOwner">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+                android:name=".OnePiexlActivity"
+                android:screenOrientation="portrait"
+                android:theme="@style/OnePixelActivity"></activity>
 
         <!-- <activity-alias -->
         <!-- android:name="com.ggg.alias" -->
@@ -49,6 +61,7 @@
             <meta-data
                     android:name="android.app.device_admin"
                     android:resource="@xml/basic_device_admin_receiver" />
+
             <intent-filter>
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
@@ -56,7 +69,16 @@
 
         <activity android:name=".ProfileOwnerDesktop" />
         <activity android:name="com.profile.ui.Main2Activity" />
-        <activity android:name="com.island.Main3Activity"></activity>
+        <activity android:name="com.island.Main3Activity" />
+
+        <provider
+                android:name=".ShuttleProvider"
+                android:authorities="shuttle.provider"
+                android:enabled="true"
+                android:exported="true"
+                android:grantUriPermissions="true" />
+
+        <activity android:name=".PassActivity"></activity>
     </application>
 
 </manifest>
