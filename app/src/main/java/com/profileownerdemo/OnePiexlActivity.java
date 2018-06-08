@@ -3,22 +3,22 @@ package com.profileownerdemo;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
 
-import static com.profileownerdemo.Util.ACCROS_INTENT;
 import static com.profileownerdemo.Util.PASS_DATA;
 
 /**
  * Created by lyg on 2018/6/7.
  */
 public class OnePiexlActivity extends Activity {
+    ComponentName componentName = new ComponentName("com.profileownerdemo", "com.profileownerdemo.OnePiexlActivity");
     private BroadcastReceiver endReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -39,6 +39,9 @@ public class OnePiexlActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.e("gggg", "OnePiexlActivity start");
+        Intent intent = getIntent();
+        Bundle result = intent.getExtras();
+        Log.e("gggg", "OnePiexlActivity start  result = " + result.getString("bundle"));
         //设置1像素
         Window window = getWindow();
         window.setGravity(Gravity.LEFT | Gravity.TOP);

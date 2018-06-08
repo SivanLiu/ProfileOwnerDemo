@@ -19,9 +19,9 @@ public class MyApplicatinon extends Application {
         intentFilter.addAction(ACCROS_INTENT);
         this.registerReceiver(hiddenBroadcastReceiver, intentFilter);
 
-        Intent intent = new Intent(this, OnePiexlActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        this.startActivity(intent);
+//        Intent intent = new Intent(this, OnePiexlActivity.class);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        this.startActivity(intent);
     }
 
     @Override

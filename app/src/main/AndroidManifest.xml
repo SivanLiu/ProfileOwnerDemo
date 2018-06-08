@@ -29,7 +29,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="com.second.intent" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -42,7 +41,12 @@
                 android:finishOnTaskLaunch="false"
                 android:launchMode="singleInstance"
                 android:theme="@style/OnePixelActivity">
-
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="ggg.sivan.basic" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <activity android:name=".PermissionManager" />
@@ -73,11 +77,11 @@
                 android:grantUriPermissions="true" />
 
         <activity android:name=".PassActivity">
-            <intent-filter>
-                <action android:name="ggg.sivan.basic" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
+            <!--<intent-filter>-->
+                <!--<action android:name="ggg.sivan.basic" />-->
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+                <!--<data android:mimeType="text/plain" />-->
+            <!--</intent-filter>-->
         </activity>
     </application>
 
