@@ -10,6 +10,9 @@
 
     <style name="OnePixelActivity" parent="android:Theme.Holo.Light.NoActionBar">//无标题
         <item name="android:windowIsTranslucent">true</item>//透明
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoDisplay">false</item>
+        <item name="android:windowDisablePreview">true</item>
     </style>
 
 </resources>

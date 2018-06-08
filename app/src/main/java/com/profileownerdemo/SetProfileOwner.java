@@ -20,13 +20,12 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import static android.app.admin.DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT;
-import static android.app.admin.DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED;
 import static com.profileownerdemo.Util.ACCROS_INTENT;
 import static com.profileownerdemo.Util.PASS_DATA;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class SetProfileOwner extends AppCompatActivity implements View.OnClickListener {
-    private static final ComponentName LAUNCHER_COMPONENT_NAME = new ComponentName(
+    public static final ComponentName LAUNCHER_COMPONENT_NAME = new ComponentName(
             "com.profileownerdemo", "com.profileownerdemo.SetProfileOwner");
     private Button setProfile;
     private Button startApp;
@@ -44,6 +43,11 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        Log.e("ggg", "action = " + action + "  type = " + type);
 
         manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         launcherApps = (LauncherApps) this.getSystemService(LAUNCHER_APPS_SERVICE);
@@ -54,9 +58,9 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 //        filter.addDataType("image/jpeg");
 //        filter.addDataType();
         // This is how you can register an IntentFilter as allowed pattern of Intent forwarding
-        if (Process.myUserHandle().hashCode() != 0) {
+        if (manager.isAdminActive(BasicDeviceAdminReceiver.getComponentName(this))) {
             manager.addCrossProfileIntentFilter(BasicDeviceAdminReceiver.getComponentName(this),
-                    filter, FLAG_MANAGED_CAN_ACCESS_PARENT | FLAG_PARENT_CAN_ACCESS_MANAGED);
+                    filter, FLAG_MANAGED_CAN_ACCESS_PARENT);
         }
 
         setProfile = findViewById(R.id.set_up_profile);
@@ -95,28 +99,26 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         switch (v.getId()) {
             case R.id.set_up_profile:
                 UserHandle destUser;
-                if (multiUser) {
-                    Log.e("ggg", "disabled ");
-//                    Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, true);
-                    for (UserHandle currentUser : userManager.getUserProfiles()) {
-                        if (currentUser.hashCode() == 0) {
-                            Log.e("ggg", "send  1 " + Util.isMainActivityAlive(this, "com.profileownerdemo.OnePiexlActivity"));
-                            Intent intent = new Intent(ACCROS_INTENT);
-                            intent.putExtra(PASS_DATA, "one start .....");
-                            this.sendBroadcast(new Intent(ACCROS_INTENT));
 
-                            Log.e("ggg", "send  2 " + currentUser.toString());
-                        }
-
-                        if (currentUser.hashCode() != 0) {
-                            destUser = currentUser;
-//                            Util.startLauncherActivity(launcherApps, this.getPackageName(), destUser);
-                            return;
-                        }
-                    }
-                    return;
-                }
-                provisionManagedProfile(this);
+                Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, true);
+//                if (multiUser) {
+//                    for (UserHandle currentUser : userManager.getUserProfiles()) {
+//                        if (currentUser.hashCode() == 0) {
+//                            Intent intent = new Intent(ACCROS_INTENT);
+//                            intent.putExtra(PASS_DATA, "one start .....");
+//                            this.sendBroadcast(new Intent(ACCROS_INTENT));
+//                            Log.e("ggg", "send  2 " + currentUser.toString());
+//                        }
+//
+//                        if (currentUser.hashCode() != 0) {
+//                            destUser = currentUser;
+////                            Util.startLauncherActivity(launcherApps, this.getPackageName(), destUser);
+//                            return;
+//                        }
+//                    }
+//                    return;
+//                }
+//                provisionManagedProfile(this);
                 break;
             case R.id.startApp:
                 for (UserHandle currentUser : userManager.getUserProfiles()) {

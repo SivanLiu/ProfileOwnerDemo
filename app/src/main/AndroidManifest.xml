@@ -28,29 +28,23 @@
         <activity android:name=".SetProfileOwner">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="com.second.intent" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
                 android:name=".OnePiexlActivity"
-                android:screenOrientation="portrait"
-                android:theme="@style/OnePixelActivity"></activity>
+                android:configChanges="keyboardHidden|orientation|screenSize|navigation|keyboard"
+                android:excludeFromRecents="true"
+                android:exported="true"
+                android:finishOnTaskLaunch="false"
+                android:launchMode="singleInstance"
+                android:theme="@style/OnePixelActivity">
 
-        <!-- <activity-alias -->
-        <!-- android:name="com.ggg.alias" -->
-        <!-- android:targetActivity=".SetProfileOwner" -->
-        <!-- android:label="Samples Alias" -->
-        <!-- android:enabled="true"> -->
+        </activity>
 
-
-        <!-- <intent-filter> -->
-        <!-- <action android:name="android.intent.action.MAIN" /> -->
-        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-        <!-- </intent-filter> -->
-
-
-        <!-- </activity-alias> -->
         <activity android:name=".PermissionManager" />
 
         <receiver
@@ -78,7 +72,13 @@
                 android:exported="true"
                 android:grantUriPermissions="true" />
 
-        <activity android:name=".PassActivity"></activity>
+        <activity android:name=".PassActivity">
+            <intent-filter>
+                <action android:name="ggg.sivan.basic" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
