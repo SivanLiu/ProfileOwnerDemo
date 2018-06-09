@@ -11,6 +11,37 @@
             android:text="SetProfile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+    <Button
+            android:id="@+id/enable_componment"
+            android:text="enable_componment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    <Button
+            android:id="@+id/disable_componment"
+            android:text="disable_componment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    <Button
+            android:id="@+id/enable_across_intent"
+            android:text="enable_across_intent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    <Button
+            android:id="@+id/disable_across_intent"
+            android:text="disable_across_intent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    <Button
+            android:id="@+id/send_across_intent"
+            android:text="send_across_intent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
     <Button
             android:id="@+id/startApp"
             android:text="StartApp"

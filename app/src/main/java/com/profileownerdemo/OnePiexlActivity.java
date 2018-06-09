@@ -1,47 +1,34 @@
 package com.profileownerdemo;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Process;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
 
+import static com.profileownerdemo.Util.ACROSS_INTENT_ACTION;
 import static com.profileownerdemo.Util.PASS_DATA;
+import static com.profileownerdemo.Util.PASS_DATA_KEY;
+import static com.profileownerdemo.Util.PASS_INTENT_ACTION;
 
 /**
  * Created by lyg on 2018/6/7.
  */
 public class OnePiexlActivity extends Activity {
-    ComponentName componentName = new ComponentName("com.profileownerdemo", "com.profileownerdemo.OnePiexlActivity");
-    private BroadcastReceiver endReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Intent secondIntent = new Intent(context, PassActivity.class);
-            String data = intent.getStringExtra(PASS_DATA);
-            secondIntent.putExtra(PASS_DATA, data);
-            Log.e("ggg", "intent " + intent.getAction() + "  data = " + data);
-            try {
-                context.startActivity(intent);
-            } catch (ActivityNotFoundException e) {
-                Log.e("ggg", "ActivityNotFoundException");
-                e.printStackTrace();
-            }
-        }
-    };
+    private static final String TAG = "OnePiexlActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.e("gggg", "OnePiexlActivity start");
-        Intent intent = getIntent();
-        Bundle result = intent.getExtras();
-        Log.e("gggg", "OnePiexlActivity start  result = " + result.getString("bundle"));
+//        if (Process.myUserHandle().hashCode() != 0) {
+//            Log.e(TAG, "OnePiexlActivity return");
+//            return;
+//        }
+
+        Log.e(TAG, "OnePiexlActivity start");
         //设置1像素
         Window window = getWindow();
         window.setGravity(Gravity.LEFT | Gravity.TOP);
@@ -52,20 +39,33 @@ public class OnePiexlActivity extends Activity {
         params.width = 1;
         window.setAttributes(params);
 
-//        IntentFilter intentFilter = new IntentFilter();
-//        intentFilter.addAction(ACCROS_INTENT);
-//        registerReceiver(endReceiver, intentFilter);
+        Intent intent = getIntent();
+        Log.e(TAG, "receive intent " + (intent == null ? null : intent.getAction()));
+        if (intent != null && ACROSS_INTENT_ACTION.equals(intent.getAction())) {
+            String action = intent.getAction();
+            Bundle receiveBundle = intent.getBundleExtra(PASS_DATA);
+            String result = receiveBundle.getString(PASS_DATA_KEY);
+            Log.e(TAG, "UserHandler = " + Process.myUserHandle().toString() + " action = " + action + " result = " + result);
+
+            Intent sendIntent = new Intent();
+            intent.setAction(PASS_INTENT_ACTION);
+            intent.putExtra(PASS_DATA, receiveBundle);
+            this.sendBroadcast(sendIntent);
+            Log.e(TAG, "sendBroadcast intent to ....");
+        }
+
+//        finish();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.e("ggg", "onePixelActivity destroy");
-//        this.unregisterReceiver(endReceiver);
+        Log.e(TAG, "onePixelActivity destroy");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        Log.e(TAG, "onePixelActivity onResume");
     }
 }

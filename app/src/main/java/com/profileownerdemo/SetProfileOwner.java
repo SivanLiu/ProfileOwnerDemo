@@ -2,11 +2,14 @@ package com.profileownerdemo;
 
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
@@ -19,15 +22,28 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.util.List;
+
 import static android.app.admin.DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT;
-import static com.profileownerdemo.Util.ACCROS_INTENT;
+import static android.app.admin.DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED;
+import static com.profileownerdemo.Util.ACROSS_INTENT_ACTION;
 import static com.profileownerdemo.Util.PASS_DATA;
+import static com.profileownerdemo.Util.PASS_DATA_KEY;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class SetProfileOwner extends AppCompatActivity implements View.OnClickListener {
+    private static final String TAG = "SetProfileOwner";
     public static final ComponentName LAUNCHER_COMPONENT_NAME = new ComponentName(
             "com.profileownerdemo", "com.profileownerdemo.SetProfileOwner");
+
+    public static final ComponentName onePiexlActivity = new ComponentName("com.profileownerdemo", "com.profileownerdemo.OnePiexlActivity");
+
     private Button setProfile;
+    private Button bt_enable_componment;
+    private Button bt_disable_componment;
+    private Button bt_enable_across_intent;
+    private Button bt_disable_across_intent;
+    private Button bt_send_across_intent;
     private Button startApp;
     private static final int REQUEST_PROVISION_MANAGED_PROFILE = 1;
     private boolean multiUser = false;
@@ -35,37 +51,43 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     private static LauncherApps launcherApps = null;
     private UserManager userManager = null;
 
-    String method = "isSuccess";
-    String uri = "content://shuttle.provider";
-    Bundle bundle = null;
+    IntentFilter intentFilter = new IntentFilter(ACROSS_INTENT_ACTION);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        String type = intent.getType();
 
-        Log.e("ggg", "action = " + action + "  type = " + type);
+        Intent intent = getIntent();
+        Log.e(TAG, "intent = " + intent);
+        String result = "";
+        if (intent != null) {
+            String action = intent.getAction();
+            Bundle data = intent.getExtras();
+            if (data != null) {
+                Log.e(TAG, "data = " + data.toString());
+                result = data.getString(PASS_DATA_KEY);
+            }
+            Log.e(TAG, "UserHandler = " + Process.myUserHandle().toString() + " action = " + action + " result = " + result);
+        }
 
         manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         launcherApps = (LauncherApps) this.getSystemService(LAUNCHER_APPS_SERVICE);
         userManager = (UserManager) this.getSystemService(USER_SERVICE);
 
-        IntentFilter filter = new IntentFilter(Intent.ACTION_SEND);
-//        filter.addDataType("text/plain");
-//        filter.addDataType("image/jpeg");
-//        filter.addDataType();
-        // This is how you can register an IntentFilter as allowed pattern of Intent forwarding
-        if (manager.isAdminActive(BasicDeviceAdminReceiver.getComponentName(this))) {
-            manager.addCrossProfileIntentFilter(BasicDeviceAdminReceiver.getComponentName(this),
-                    filter, FLAG_MANAGED_CAN_ACCESS_PARENT);
-        }
 
         setProfile = findViewById(R.id.set_up_profile);
         setProfile.setOnClickListener(this);
-
+        bt_enable_componment = findViewById(R.id.enable_componment);
+        bt_enable_componment.setOnClickListener(this);
+        bt_disable_componment = findViewById(R.id.disable_componment);
+        bt_disable_componment.setOnClickListener(this);
+        bt_enable_across_intent = findViewById(R.id.enable_across_intent);
+        bt_enable_across_intent.setOnClickListener(this);
+        bt_disable_across_intent = findViewById(R.id.disable_across_intent);
+        bt_disable_across_intent.setOnClickListener(this);
+        bt_send_across_intent = findViewById(R.id.send_across_intent);
+        bt_send_across_intent.setOnClickListener(this);
         startApp = findViewById(R.id.startApp);
         startApp.setOnClickListener(this);
 
@@ -98,38 +120,65 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.set_up_profile:
-                UserHandle destUser;
-
-                Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, true);
-//                if (multiUser) {
-//                    for (UserHandle currentUser : userManager.getUserProfiles()) {
-//                        if (currentUser.hashCode() == 0) {
-//                            Intent intent = new Intent(ACCROS_INTENT);
-//                            intent.putExtra(PASS_DATA, "one start .....");
-//                            this.sendBroadcast(new Intent(ACCROS_INTENT));
-//                            Log.e("ggg", "send  2 " + currentUser.toString());
-//                        }
-//
-//                        if (currentUser.hashCode() != 0) {
-//                            destUser = currentUser;
-////                            Util.startLauncherActivity(launcherApps, this.getPackageName(), destUser);
-//                            return;
-//                        }
-//                    }
-//                    return;
-//                }
-//                provisionManagedProfile(this);
+                provisionManagedProfile(this);
                 break;
-            case R.id.startApp:
-                for (UserHandle currentUser : userManager.getUserProfiles()) {
-                    if (currentUser.hashCode() != 0) {
-                        destUser = currentUser;
-                        Log.e("ggg", "startApp " + currentUser.toString());
-                        Util.startLauncherActivity(launcherApps, this.getPackageName(), destUser);
-                        return;
+
+            case R.id.enable_componment:
+                Log.e(TAG, "enable_componment");
+                Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, false);
+                break;
+
+            case R.id.disable_componment:
+                Log.e(TAG, "disable_componment");
+                Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, true);
+                break;
+
+            case R.id.enable_across_intent:
+                //只有在设备管理激活的情况下才可以使用该接口
+                Log.e(TAG, "enable_across_intent admin = " + manager.isAdminActive(BasicDeviceAdminReceiver.getComponentName(this)));
+
+                if (manager.isAdminActive(BasicDeviceAdminReceiver.getComponentName(this))) {
+                    manager.addCrossProfileIntentFilter(BasicDeviceAdminReceiver.getComponentName(this),
+                            intentFilter, FLAG_MANAGED_CAN_ACCESS_PARENT | FLAG_PARENT_CAN_ACCESS_MANAGED);
+                    Log.e(TAG, "enable_across_intent");
+                }
+                break;
+
+            case R.id.disable_across_intent:
+                if (manager.isAdminActive(BasicDeviceAdminReceiver.getComponentName(this))) {
+                    manager.clearCrossProfileIntentFilters(BasicDeviceAdminReceiver.getComponentName(this));
+                    Log.e(TAG, "disable_across_intent");
+                }
+                break;
+
+            case R.id.send_across_intent:
+                Intent intent = new Intent(ACROSS_INTENT_ACTION);
+                Bundle bundle = new Bundle();
+                bundle.putString(PASS_DATA_KEY, "value....");
+                intent.putExtra(PASS_DATA, bundle);
+                try {
+                    List<ResolveInfo> list = getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+                    for (ResolveInfo resolveInfo : list) {
+                        Log.e(TAG, " resolveInfo : " + resolveInfo);
                     }
+
+                    startActivity(intent);
+                    Log.e(TAG, "send_across_intent...");
+                } catch (ActivityNotFoundException e) {
+                    e.printStackTrace();
                 }
 
+                try {
+                    Log.e(TAG, "send_across_intent... " + Process.myUserHandle().toString());
+                } catch (ActivityNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+
+            case R.id.startApp:
+//                startActivity();
+                Util.startLauncherActivity(launcherApps, this.getPackageName(), Util.getSecondeUserHandle(this));
                 break;
             default:
                 break;
@@ -139,7 +188,6 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.e("ggg", "receive intent = " + data.getAction() + "  currentUser : " + Process.myUserHandle().toString());
         if (requestCode == REQUEST_PROVISION_MANAGED_PROFILE) {
             if (resultCode == Activity.RESULT_OK) {
                 Toast.makeText(this, "Provisioning done.", Toast.LENGTH_SHORT).show();

@@ -22,10 +22,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 
 /**
  * Handles events related to managed profile.
  */
+@RequiresApi(api = Build.VERSION_CODES.FROYO)
 public class BasicDeviceAdminReceiver extends DeviceAdminReceiver {
 
     /**
@@ -37,11 +39,10 @@ public class BasicDeviceAdminReceiver extends DeviceAdminReceiver {
     @Override
     public void onProfileProvisioningComplete(Context context, Intent intent) {
         // EnableProfileActivity is launched with the newly set up profile.
-//        Intent launch = new Intent(context, SetProfileOwner.class);
-//        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        context.startActivity(launch);
+        Intent launch = new Intent(context, SetProfileOwner.class);
+        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(launch);
         enableProfile(context);
-
     }
 
     /**
@@ -59,7 +60,7 @@ public class BasicDeviceAdminReceiver extends DeviceAdminReceiver {
         ComponentName componentName = BasicDeviceAdminReceiver.getComponentName(context);
         // This is the name for the newly created managed profile.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            manager.setProfileName(componentName, "sg_profile");
+            manager.setProfileName(componentName, context.getString(R.string.profile_name));
         }
 
         // We enable the profile here.

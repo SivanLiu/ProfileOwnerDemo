@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -34,6 +35,11 @@ public class Util {
     public static final String LAUNCH_MAIN_ACTIVITY = "launch_main_activity";
     public static final String SECOND_INTENT = "com.second.intent";
     public static final String PASS_DATA = "data";
+    public static final String PASS_DATA_KEY = "key";
+    public static final String ACROSS_INTENT_ACTION = "com.intent.across";
+    public static final String PASS_INTENT_ACTION = "com.intent.pass";
+    public static ComponentName componentName = new ComponentName("com.profileownerdemo", "com.profileownerdemo.OnePiexlActivity");
+
 
     public synchronized ArrayList<String> getStorageDirectories(Activity activity) {
         // Final set of paths
@@ -200,5 +206,31 @@ public class Util {
             }
         }
         return false;
+    }
+
+    public static UserHandle getSecondeUserHandle(Context context) {
+        UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        if (userManager == null) {
+            return null;
+        }
+        for (UserHandle userHandle : userManager.getUserProfiles()) {
+            if (userHandle.hashCode() != 0) {
+                return userHandle;
+            }
+        }
+        return null;
+    }
+
+    public static UserHandle getSystemUserHandler(Context context) {
+        UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        if (userManager == null) {
+            return null;
+        }
+        for (UserHandle userHandle : userManager.getUserProfiles()) {
+            if (userHandle.hashCode() == 0) {
+                return userHandle;
+            }
+        }
+        return null;
     }
 }
