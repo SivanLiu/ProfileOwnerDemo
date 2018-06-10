@@ -142,6 +142,10 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 try {
                     Util.setDisableComponent(this, new ComponentName(getPackageName(), OnePiexlActivity.class.getName()), true);
                     startActivity(intent);
+                    if (Process.myUserHandle().hashCode() != 0) {
+                        Util.setApplicationHidden(this, manager, Util.getInstalledApps(this), true);
+                    }
+
                     Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, true);
 
                     try {

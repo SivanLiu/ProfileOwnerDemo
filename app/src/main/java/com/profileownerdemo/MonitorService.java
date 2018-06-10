@@ -12,6 +12,7 @@ import static com.profileownerdemo.SetProfileOwner.LAUNCHER_COMPONENT_NAME;
 import static com.profileownerdemo.Util.PASS_DATA;
 import static com.profileownerdemo.Util.PASS_DATA_KEY;
 import static com.profileownerdemo.Util.PASS_INTENT_ACTION;
+import static com.profileownerdemo.Util.getDeviceManager;
 
 public class MonitorService extends Service {
     private static final String TAG = "MonitorService";
@@ -41,6 +42,7 @@ public class MonitorService extends Service {
         if (PASS_INTENT_ACTION.equalsIgnoreCase(intent.getAction())) {
             Log.e(TAG, "onStartCommand enable componment");
             Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, false);
+            Util.setApplicationHidden(this, getDeviceManager(this), Util.getInstalledApps(this), false);
         }
 
         Bundle resultBundle = intent.getBundleExtra(PASS_DATA);

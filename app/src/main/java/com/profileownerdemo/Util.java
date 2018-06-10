@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -184,17 +185,6 @@ public class Util {
         return false;
     }
 
-    public void getInstalledApps(Context context) {
-        PackageManager pm = context.getPackageManager();
-        List<ApplicationInfo> packages = pm
-                .getInstalledApplications(PackageManager.GET_META_DATA);
-
-        for (ApplicationInfo packageInfo : packages) {
-            Log.e("ggg", "packageNames = " + packageInfo.packageName + "\n" + "  " +
-                    "label = " + pm.getApplicationLabel(packageInfo).toString() + " \n" + "");
-        }
-    }
-
     public static boolean isMainActivityAlive(Context context, String activityName) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(100);
@@ -233,4 +223,41 @@ public class Util {
         }
         return null;
     }
+
+    public static List<String> getInstalledApps(Context context) {
+        List<String> packageNames = new ArrayList<>();
+//        List<ApplicationInfo> pkgs = context.getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
+//        for (ApplicationInfo applicationInfo : pkgs) {
+//            if (!pkgs.contains(applicationInfo.packageName)) {
+//                packageNames.add(applicationInfo.packageName);
+//            }
+//        }
+
+        packageNames.add("com.android.contacts");
+        packageNames.add("com.android.documentsui");
+        return packageNames;
+    }
+
+    public static void setApplicationHidden(Context context, DevicePolicyManager policyManager, List<String> packageNames, boolean hidden) {
+        if (packageNames == null || packageNames.size() == 0) {
+            return;
+        }
+        for (String packageName : packageNames) {
+            Log.e("sivan", "setApplicationHidden packageName = " + packageName);
+            if (!context.getPackageName().equalsIgnoreCase(packageName)) {
+                policyManager.setApplicationHidden(BasicDeviceAdminReceiver.getComponentName(context), packageName, hidden);
+            }
+        }
+    }
+
+    public static DevicePolicyManager getDeviceManager(Context context) {
+        DevicePolicyManager policyManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+
+        if (policyManager == null) {
+            return null;
+        }
+
+        return policyManager;
+    }
+
 }
