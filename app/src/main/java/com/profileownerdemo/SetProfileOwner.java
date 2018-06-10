@@ -8,8 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.LauncherApps;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
@@ -21,8 +19,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
-import java.util.List;
 
 import static android.app.admin.DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT;
 import static android.app.admin.DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED;
@@ -57,19 +53,6 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Intent intent = getIntent();
-        Log.e(TAG, "intent = " + intent);
-        String result = "";
-        if (intent != null) {
-            String action = intent.getAction();
-            Bundle data = intent.getExtras();
-            if (data != null) {
-                Log.e(TAG, "data = " + data.toString());
-                result = data.getString(PASS_DATA_KEY);
-            }
-            Log.e(TAG, "UserHandler = " + Process.myUserHandle().toString() + " action = " + action + " result = " + result);
-        }
 
         manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         launcherApps = (LauncherApps) this.getSystemService(LAUNCHER_APPS_SERVICE);
@@ -157,19 +140,19 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 bundle.putString(PASS_DATA_KEY, "value....");
                 intent.putExtra(PASS_DATA, bundle);
                 try {
-                    List<ResolveInfo> list = getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-                    for (ResolveInfo resolveInfo : list) {
-                        Log.e(TAG, " resolveInfo : " + resolveInfo);
+                    Util.setDisableComponent(this, new ComponentName(getPackageName(), OnePiexlActivity.class.getName()), true);
+                    startActivity(intent);
+                    Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, true);
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
 
-                    startActivity(intent);
-                    Log.e(TAG, "send_across_intent...");
-                } catch (ActivityNotFoundException e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                    Log.e(TAG, "send_across_intent... " + Process.myUserHandle().toString());
+                    Util.setDisableComponent(this, new ComponentName(getPackageName(), OnePiexlActivity.class.getName()), false);
+                    finish();
+                    Log.e(TAG, Process.myUserHandle().toString() + " send_across_intent...");
                 } catch (ActivityNotFoundException e) {
                     e.printStackTrace();
                 }

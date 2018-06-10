@@ -4,7 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Process;
+import android.text.TextUtils;
 import android.util.Log;
 
 import static com.profileownerdemo.Util.PASS_DATA;
@@ -25,7 +27,18 @@ public class HiddenBroadcastReceiver extends BroadcastReceiver {
 //        Util.setDisableComponent(context, LAUNCHER_COMPONENT_NAME, false);
 
         String action = intent.getAction();
-        String result = intent.getBundleExtra(PASS_DATA).getString(PASS_DATA_KEY);
+        if (TextUtils.isEmpty(action)) {
+            Log.e(TAG, "action is null");
+            return;
+        }
+
+        Bundle resultBundle = intent.getBundleExtra(PASS_DATA);
+        if (resultBundle == null) {
+            Log.e(TAG, "result bundle is null");
+            return;
+        }
+
+        String result = resultBundle.getString(PASS_DATA_KEY);
         Log.e(TAG, "last receive UserHandler = " + Process.myUserHandle().toString() + " action = " + action + " result = " + result);
     }
 }

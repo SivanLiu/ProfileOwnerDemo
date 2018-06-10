@@ -47,14 +47,15 @@ public class OnePiexlActivity extends Activity {
             String result = receiveBundle.getString(PASS_DATA_KEY);
             Log.e(TAG, "UserHandler = " + Process.myUserHandle().toString() + " action = " + action + " result = " + result);
 
-            Intent sendIntent = new Intent();
-            intent.setAction(PASS_INTENT_ACTION);
-            intent.putExtra(PASS_DATA, receiveBundle);
-            this.sendBroadcast(sendIntent);
-            Log.e(TAG, "sendBroadcast intent to ....");
+            Intent sendIntent = new Intent(this, MonitorService.class);
+            sendIntent.setAction(PASS_INTENT_ACTION);
+            sendIntent.putExtra(PASS_DATA, receiveBundle);
+//            sendBroadcast(sendIntent);
+            this.startService(sendIntent);
+            Log.e(TAG, sendIntent + " sendBroadcast intent to ....");
         }
 
-//        finish();
+        finish();
     }
 
     @Override
@@ -67,5 +68,6 @@ public class OnePiexlActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Log.e(TAG, "onePixelActivity onResume");
+        finish();
     }
 }
