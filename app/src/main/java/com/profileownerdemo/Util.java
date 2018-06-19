@@ -7,6 +7,7 @@ import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
@@ -350,6 +351,23 @@ public class Util {
         } catch (PackageManager.NameNotFoundException var4) {
             return null;
         }
+    }
+
+    /**
+     * 打开一个应用
+     */
+    public static boolean launchApp(Context context, String packageName) {
+        try {
+            Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+            if (null != intent) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
 }

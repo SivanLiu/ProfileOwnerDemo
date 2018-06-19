@@ -1,9 +1,9 @@
 package com.profile.ui;
 
 import com.profileownerdemo.R;
+import com.profileownerdemo.Util;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -86,11 +86,12 @@ public class MyAdapter extends RecyclerView.Adapter {
                 @Override
                 public void onClick(View v) {
                     AppBean bean = mDataSet.get(getPosition());
-                    Intent intent = AppShowActivity.getContext().getPackageManager().getLaunchIntentForPackage(bean.getText());
-                    AppShowActivity.getContext().startActivity(intent);
+                    Util.launchApp(AppShowActivity.getContext(), bean.getText());
                 }
             });
         }
     }
+
+
 }
 

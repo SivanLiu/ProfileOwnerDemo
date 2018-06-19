@@ -65,7 +65,13 @@
         </receiver>
 
         <activity android:name=".ProfileOwnerDesktop" />
-        <activity android:name="com.profile.ui.AppShowActivity" />
+        <activity android:name="com.profile.ui.AppShowActivity">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.INFO"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name="com.island.Main3Activity" />
 
         <provider
