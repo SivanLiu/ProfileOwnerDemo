@@ -1,11 +1,10 @@
 package com.profileownerdemo;
 
-import com.profile.ui.Main2Activity;
+import com.profile.ui.AppShowActivity;
 
 import android.app.Application;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -25,7 +24,7 @@ public class ProfileOwnerDesktop extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_owenr_desktop);
-        Intent intent = new Intent(this, Main2Activity.class);
+        Intent intent = new Intent(this, AppShowActivity.class);
         startActivity(intent);
         try {
             Class<?> cls = IPackageManager.class;

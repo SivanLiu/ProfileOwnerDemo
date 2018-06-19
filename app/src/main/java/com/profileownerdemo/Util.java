@@ -10,7 +10,9 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Environment;
 import android.os.UserHandle;
@@ -226,17 +228,23 @@ public class Util {
 
     public static List<String> getInstalledApps(Context context) {
         List<String> packageNames = new ArrayList<>();
-//        List<ApplicationInfo> pkgs = context.getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
-//        for (ApplicationInfo applicationInfo : pkgs) {
-//            if (!pkgs.contains(applicationInfo.packageName)) {
-//                packageNames.add(applicationInfo.packageName);
-//            }
-//        }
+        List<PackageInfo> pkgs = getInstalledPackages(context.getPackageManager());
+        for (PackageInfo packageInfo : pkgs) {
+            if (checkUninstallable(packageInfo.applicationInfo)) {
+                packageNames.add(packageInfo.packageName);
+            }
+        }
 
-        packageNames.add("com.android.contacts");
-        packageNames.add("com.android.documentsui");
         return packageNames;
     }
+
+
+    public static List<PackageInfo> getInstalledPackages(PackageManager pm) {
+        short retrieveFlags = 0;
+        List packages = pm.getInstalledPackages(retrieveFlags);
+        return packages;
+    }
+
 
     public static void setApplicationHidden(Context context, DevicePolicyManager policyManager, List<String> packageNames, boolean hidden) {
         if (packageNames == null || packageNames.size() == 0) {
@@ -258,6 +266,90 @@ public class Util {
         }
 
         return policyManager;
+    }
+
+    public static boolean isSystemApp(ApplicationInfo applicationInfo) {
+        return applicationInfo != null && (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0;
+    }
+
+    /**
+     * 新增自定义配置列表: 该列表内的应用不卸载, 不上报
+     * Check uninstallable boolean.
+     *
+     * @param info the info
+     * @return the boolean
+     */
+    public static boolean checkUninstallable(ApplicationInfo info) {
+        if (null == info) {
+            return false;
+        }
+
+        if (isExcludeSysApps(info.packageName)) {
+            return false;
+        }
+
+        if (!isSystemApp(info)) {
+            return true;
+        }
+
+        //huawei
+        if (Util.isHwEmui()) {
+            try {
+                int flag = (int) ApplicationInfo.class.getField("hwFlags").get(info);
+                if (isTablet(MyApplication.getContext()) && (flag & 33554432) != 0) {
+                    return true;
+                }
+
+                if ((flag & 67108864) != 0 || ((flag & 33554432) != 0)) {
+                    return true;
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isExcludeSysApps(String packageName) {
+        List<String> list = new ArrayList<>();
+        //努比亚蓝牙
+        list.add("cn.nubia.bleobj");
+        //努力亚电工
+        list.add("cn.nubia.powermanage");
+        list.add("com.uei.quicksetsdk.zte");
+
+        if (list.contains(packageName)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static boolean isTablet(Context context) {
+        return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
+                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+    }
+
+
+    //TODO lyg 2017.9.13 Emui 4.0 之上才有接口调用, 判断方式后续根据实际情况修改
+    public static boolean isHwEmui() {
+        String prop = SystemPropertiesProxy.get("ro.build.version.emui", "");
+        if (prop != null && (prop.contains("EmotionUI"))) {
+            return true;
+        }
+        return false;
+    }
+
+    public static PackageInfo getPackageInfo(PackageManager pm, String packageName, int flags) {
+        try {
+            PackageInfo e = pm.getPackageInfo(packageName, flags);
+            return e;
+        } catch (PackageManager.NameNotFoundException var4) {
+            return null;
+        }
     }
 
 }

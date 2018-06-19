@@ -1,5 +1,7 @@
 package com.profileownerdemo;
 
+import com.profile.ui.AppShowActivity;
+
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
@@ -164,8 +166,9 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 break;
 
             case R.id.startApp:
-//                startActivity();
-                Util.startLauncherActivity(launcherApps, this.getPackageName(), Util.getSecondeUserHandle(this));
+                Intent showApps = new Intent(this, AppShowActivity.class);
+                startActivity(showApps);
+//                Util.startLauncherActivity(launcherApps, this.getPackageName(), Util.getSecondeUserHandle(this));
                 break;
             default:
                 break;

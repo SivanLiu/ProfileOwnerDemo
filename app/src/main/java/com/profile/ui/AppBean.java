@@ -5,23 +5,26 @@ import android.graphics.drawable.Drawable;
 /**
  * Created by lyg on 2018/4/25.
  */
-public class ItemBean {
-    private String text;
-    private Drawable drawable;
+public class AppBean {
+    //icon
+    private Drawable icon;
+
+    //包名
+    private String packageName;
 
     public Drawable getDrawable() {
-        return drawable;
+        return icon;
     }
 
     public void setDrawable(Drawable drawable) {
-        this.drawable = drawable;
+        this.icon = drawable;
     }
 
     public void setText(String text) {
-        this.text = text;
+        this.packageName = text;
     }
 
     public String getText() {
-        return text;
+        return packageName;
     }
 }
