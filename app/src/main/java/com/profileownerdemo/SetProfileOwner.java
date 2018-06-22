@@ -2,9 +2,12 @@ package com.profileownerdemo;
 
 import com.profile.ui.AppShowActivity;
 
+import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +20,11 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -54,12 +61,25 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.getWindow().setFlags(0x80000000, 0x80000000);
         setContentView(R.layout.activity_main);
+
+        //创建广播
+        InnerRecevier innerReceiver = new InnerRecevier();
+        //动态注册广播
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        //启动广播
+        registerReceiver(innerReceiver, intentFilter);
 
         manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         launcherApps = (LauncherApps) this.getSystemService(LAUNCHER_APPS_SERVICE);
         userManager = (UserManager) this.getSystemService(USER_SERVICE);
 
+        Log.e("gggg 1", "accounts = "+userManager.getUserProfiles().size());
+
+        AccountManager accountManager = (AccountManager)this.getSystemService(ACCOUNT_SERVICE);
+
+        Log.e("gggg 2", "accounts = "+ accountManager.getAccounts().length);
 
         setProfile = findViewById(R.id.set_up_profile);
         setProfile.setOnClickListener(this);
@@ -86,15 +106,43 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (manager.isProfileOwnerApp(getApplicationContext().getPackageName())) {
-//                startProfileOWnerDesktop();
-//                Intent intent = new Intent(this, PermissionManager.class);
-//                startActivity(intent);
-            } else {
-                if (!multiUser) {
-                    provisionManagedProfile(this);
-//                    startProfileOWnerDesktop();
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            if (manager.isProfileOwnerApp(getApplicationContext().getPackageName())) {
+////                startProfileOWnerDesktop();
+////                Intent intent = new Intent(this, PermissionManager.class);
+////                startActivity(intent);
+//            } else {
+//                if (!multiUser) {
+//                    provisionManagedProfile(this);
+////                    startProfileOWnerDesktop();
+//                }
+//            }
+//        }
+
+
+    }
+
+    class InnerRecevier extends BroadcastReceiver {
+
+        final String SYSTEM_DIALOG_REASON_KEY = "reason";
+
+        final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
+
+        final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
+                String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
+                if (reason != null) {
+                    if (reason.equals(SYSTEM_DIALOG_REASON_HOME_KEY)) {
+                        Log.e("ggg", "homeeeeee");
+                        Toast.makeText(getApplicationContext(), "Home键被监听", Toast.LENGTH_SHORT).show();
+                    } else if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
+                        Log.e("ggg", "rrrrrr");
+                        Toast.makeText(getApplicationContext(), "多任务键被监听", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         }
@@ -109,8 +157,9 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 break;
 
             case R.id.enable_componment:
-                Log.e(TAG, "enable_componment");
-                Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, false);
+                Intent ss = new Intent(this, OnePiexlActivity.class);
+                startActivity(ss);
+//                Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, false);
                 break;
 
             case R.id.disable_componment:
@@ -187,6 +236,37 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_HOME) {
+            Log.e("ggg", "home");
+        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Log.e("ggg", "back");
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.e("ggg", "onBackPressed");
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onPause() {
+        Intent ss = new Intent(this, OnePiexlActivity.class);
+        startActivity(ss);
+        Log.e("ggg", "onPause");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.e("ggg", "onStop");
+
+        super.onStop();
     }
 
     @Override

@@ -9,6 +9,10 @@
             android:name="android.software.managed_users"
             android:required="true" />
 
+    <uses-permission
+            android:name="android.permission.GET_ACCOUNTS"
+            android:maxSdkVersion="22" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -16,6 +20,9 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
     <uses-permission android:name="android.permission.MANAGE_USERS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
 
     <application
             android:name=".MyApplication"
@@ -30,7 +37,8 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="com.second.intent" />
-
+                <!--<category android:name="android.intent.category.HOME" />-->
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -44,7 +52,6 @@
                 android:theme="@style/OnePixelActivity">
             <intent-filter>
                 <action android:name="com.intent.across" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -68,7 +75,7 @@
         <activity android:name="com.profile.ui.AppShowActivity">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.INFO"/>
+                <category android:name="android.intent.category.INFO" />
             </intent-filter>
         </activity>
 

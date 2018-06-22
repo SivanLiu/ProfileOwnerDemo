@@ -54,6 +54,15 @@ public class MonitorService extends Service {
         String result = resultBundle.getString(PASS_DATA_KEY);
         Log.e(TAG, "last receive UserHandler = " + Process.myUserHandle().toString() + " action = " + action + " result = " + result);
 
+        try {
+            Thread.sleep(15000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Intent start = new Intent(this, SetProfileOwner.class);
+        startActivity(start);
+
         super.onStartCommand(intent, flags, startId);
         return START_STICKY;
     }
