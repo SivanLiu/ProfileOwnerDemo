@@ -4,7 +4,10 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +30,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import static android.os.Build.VERSION.SDK_INT;
@@ -43,6 +48,7 @@ public class Util {
     public static final String ACROSS_INTENT_ACTION = "com.intent.across";
     public static final String PASS_INTENT_ACTION = "com.intent.pass";
     public static ComponentName componentName = new ComponentName("com.profileownerdemo", "com.profileownerdemo.OnePiexlActivity");
+    private static long checkInterval = 2000L;
 
 
     public synchronized ArrayList<String> getStorageDirectories(Activity activity) {
@@ -370,4 +376,44 @@ public class Util {
         return false;
     }
 
+    public static String getTopPkgByUsage(Context context) {
+        if (context == null) {
+            return null;
+        }
+        long beginTime = System.currentTimeMillis();
+        UsageStatsManager usage = (UsageStatsManager) context.getSystemService("usagestats");
+        if (beginTime < 1) {
+            beginTime = System.currentTimeMillis();
+        }
+
+        List<UsageStats> stats = usage.queryUsageStats(0, beginTime - checkInterval, beginTime);
+        if (stats == null) {
+            return null;
+        }
+        checkInterval += 2000;
+        SortedMap<Long, UsageStats> runningTask = new TreeMap();
+        for (UsageStats usageStats : stats) {
+            runningTask.put(Long.valueOf(usageStats.getLastTimeUsed()), usageStats);
+        }
+        if (runningTask.isEmpty()) {
+            return "";
+        }
+        return ((UsageStats) runningTask.get(runningTask.lastKey())).getPackageName();
+    }
+
+
+    public static boolean isAppUsageStatAccessPermitted(Context context) {
+        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        if (null == appOps) {
+            return false;
+        }
+
+        try {
+            ApplicationInfo info = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0);
+            return appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, info.uid, info.packageName) == AppOpsManager.MODE_ALLOWED;
+        } catch (Exception e) {
+            return false;
+        }
+
+    }
 }

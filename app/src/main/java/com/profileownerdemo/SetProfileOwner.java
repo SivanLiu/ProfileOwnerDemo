@@ -1,33 +1,31 @@
 package com.profileownerdemo;
 
-import com.profile.ui.AppShowActivity;
-
 import android.accounts.AccountManager;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.LauncherApps;
+import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
-import android.telecom.PhoneAccountHandle;
-import android.telecom.TelecomManager;
-import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.app.admin.DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT;
 import static android.app.admin.DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED;
@@ -58,28 +56,39 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 
     IntentFilter intentFilter = new IntentFilter(ACROSS_INTENT_ACTION);
 
+    private HomeKeyLocker locker;
+    private Activity activity;
+
+    public static final int FLAG_HOMEKEY_DISPATCHED = 0x80000000;
+    private Window window;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.getWindow().setFlags(0x80000000, 0x80000000);
         setContentView(R.layout.activity_main);
+        activity = this;
+        if (!Util.isAppUsageStatAccessPermitted(this)) {
+            Intent usage = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+            startActivity(usage);
+        }
 
-        //创建广播
-        InnerRecevier innerReceiver = new InnerRecevier();
-        //动态注册广播
-        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        //启动广播
-        registerReceiver(innerReceiver, intentFilter);
-
+        Log.e("ggg", "top package : " + Util.getTopPkgByUsage(this) + " intent = "+getIntent());
+        if (!this.getPackageName().equals(Util.getTopPkgByUsage(this))) {
+            finish();
+//            openLauncherUi();
+        } else {
+            openLauncherUi();
+            Log.e("ggggggg", "");
+        }
         manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         launcherApps = (LauncherApps) this.getSystemService(LAUNCHER_APPS_SERVICE);
         userManager = (UserManager) this.getSystemService(USER_SERVICE);
 
-        Log.e("gggg 1", "accounts = "+userManager.getUserProfiles().size());
+        Log.e("gggg 1", "accounts = " + userManager.getUserProfiles().size());
 
-        AccountManager accountManager = (AccountManager)this.getSystemService(ACCOUNT_SERVICE);
+        AccountManager accountManager = (AccountManager) this.getSystemService(ACCOUNT_SERVICE);
 
-        Log.e("gggg 2", "accounts = "+ accountManager.getAccounts().length);
+        Log.e("gggg 2", "accounts = " + accountManager.getAccounts().length);
 
         setProfile = findViewById(R.id.set_up_profile);
         setProfile.setOnClickListener(this);
@@ -122,32 +131,47 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 
     }
 
-    class InnerRecevier extends BroadcastReceiver {
-
-        final String SYSTEM_DIALOG_REASON_KEY = "reason";
-
-        final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
-
-        final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
-                String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
-                if (reason != null) {
-                    if (reason.equals(SYSTEM_DIALOG_REASON_HOME_KEY)) {
-                        Log.e("ggg", "homeeeeee");
-                        Toast.makeText(getApplicationContext(), "Home键被监听", Toast.LENGTH_SHORT).show();
-                    } else if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
-                        Log.e("ggg", "rrrrrr");
-                        Toast.makeText(getApplicationContext(), "多任务键被监听", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
+    private boolean openLauncherUi() {
+        ArrayList<String> list = getLauncherPkgToStart(this);
+        if (list == null || list.size() < 1) {
+            finish();
+            return false;
+        }
+        String pkg = list.get(0);
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        intent.setPackage(pkg);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        Log.e("gggg", "pkg = " + pkg);
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    private static ArrayList<String> getLauncherPkgToStart(Context context) {
+        ArrayList<String> list = new ArrayList<>();
+
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        List<ResolveInfo> installedList = context.getApplicationContext()
+                .getPackageManager().queryIntentActivities(intent, 0);
+        for (ResolveInfo info : installedList) {
+            String pkg = info.activityInfo.packageName;
+            if (context.getPackageName().equals(pkg)) {
+                continue;
+            }
+            list.add(pkg);
+        }
+        return list;
+    }
 
     @Override
     public void onClick(View v) {
@@ -215,8 +239,12 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 break;
 
             case R.id.startApp:
-                Intent showApps = new Intent(this, AppShowActivity.class);
-                startActivity(showApps);
+//                Intent showApps = new Intent(this, AppShowActivity.class);
+//                startActivity(showApps);
+
+                Intent intents = new Intent(this, OnePiexlActivity.class);
+                intents.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                this.startActivity(intents);
 //                Util.startLauncherActivity(launcherApps, this.getPackageName(), Util.getSecondeUserHandle(this));
                 break;
             default:
@@ -238,34 +266,28 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_HOME) {
-            Log.e("ggg", "home");
-        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
-            Log.e("ggg", "back");
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    public void onBackPressed() {
-        Log.e("ggg", "onBackPressed");
-        super.onBackPressed();
-    }
+//    @Override
+//    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        if (keyCode == KeyEvent.KEYCODE_BACK) {
+//            return true;
+//        }
+//        return super.onKeyDown(keyCode, event);
+//    }
+//
+//    @Override
+//    public void onBackPressed() {
+//        Log.e("ggg", "onBackPressed");
+//        super.onBackPressed();
+//    }
 
     @Override
     protected void onPause() {
-        Intent ss = new Intent(this, OnePiexlActivity.class);
-        startActivity(ss);
         Log.e("ggg", "onPause");
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        Log.e("ggg", "onStop");
-
         super.onStop();
     }
 
