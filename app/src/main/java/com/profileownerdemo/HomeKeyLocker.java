@@ -45,6 +45,7 @@ public class HomeKeyLocker {
             getWindow().setAttributes(params);
             getWindow().setFlags(FLAG_SHOW_WHEN_LOCKED | FLAG_NOT_TOUCH_MODAL, 0xffffff);
             setOwnerActivity(activity);
+            setCanceledOnTouchOutside(false);
             setCancelable(false);
         }
 

@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
@@ -415,5 +416,20 @@ public class Util {
             return false;
         }
 
+    }
+
+    private void startSelfFromPendingIntent(Context context) {
+        Intent intent = new Intent();
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setComponent(new ComponentName(context, SetProfileOwner.class));
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+        try {
+            pendingIntent.send();
+        } catch (Exception e) {
+            Log.e("", "stayTop fail");
+        }
     }
 }

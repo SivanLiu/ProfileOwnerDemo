@@ -1,6 +1,7 @@
 package com.profileownerdemo;
 
 import android.app.Application;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +34,17 @@ public class MyApplication extends Application {
                 if (reason != null) {
                     if (reason.equals(SYSTEM_DIALOG_REASON_HOME_KEY)) {
                         Log.e("ggg", "homeeeeee");
+                        for (int j = 0; j < 10; j++) {
+                            Intent setIntent = new Intent(context, SetProfileOwner.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            PendingIntent pendingIntent =
+                                    PendingIntent.getActivity(context, 0, setIntent, 0);
+                            try {
+                                pendingIntent.send();
+                            } catch (PendingIntent.CanceledException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     } else if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
                         Log.e("ggg", "rrrrrr");
 //                        Toast.makeText(getApplicationContext(), "多任务键被监听", Toast.LENGTH_SHORT).show();

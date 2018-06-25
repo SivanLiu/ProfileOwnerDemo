@@ -49,7 +49,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     private Button bt_send_across_intent;
     private Button startApp;
     private static final int REQUEST_PROVISION_MANAGED_PROFILE = 1;
-    private boolean multiUser = false;
+    private boolean multiUser = false;` ''
     private DevicePolicyManager manager = null;
     private static LauncherApps launcherApps = null;
     private UserManager userManager = null;
