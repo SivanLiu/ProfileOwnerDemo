@@ -1,12 +1,10 @@
 package com.profileownerdemo;
 
 import android.app.Application;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Log;
 
 import static com.profileownerdemo.Util.PASS_INTENT_ACTION;
 
@@ -19,11 +17,8 @@ public class MyApplication extends Application {
     private static Context context;
 
     class InnerRecevier extends BroadcastReceiver {
-
         final String SYSTEM_DIALOG_REASON_KEY = "reason";
-
         final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
-
         final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
 
         @Override
@@ -33,20 +28,12 @@ public class MyApplication extends Application {
                 String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
                 if (reason != null) {
                     if (reason.equals(SYSTEM_DIALOG_REASON_HOME_KEY)) {
-                        Log.e("ggg", "homeeeeee");
-                        for (int j = 0; j < 10; j++) {
-                            Intent setIntent = new Intent(context, SetProfileOwner.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            PendingIntent pendingIntent =
-                                    PendingIntent.getActivity(context, 0, setIntent, 0);
-                            try {
-                                pendingIntent.send();
-                            } catch (PendingIntent.CanceledException e) {
-                                e.printStackTrace();
-                            }
+                        if ("com.profileownerdemo".equals(Util.getTopPkgByUsage(context))) {
+                            OnePiexlActivity.showHome.set(false);
+                        } else {
+                            OnePiexlActivity.showHome.set(true);
                         }
                     } else if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
-                        Log.e("ggg", "rrrrrr");
 //                        Toast.makeText(getApplicationContext(), "多任务键被监听", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -67,13 +54,14 @@ public class MyApplication extends Application {
 
         IntentFilter intentFilter1 = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         this.registerReceiver(innerRecevier, intentFilter1);
+
+        startService(new Intent(this, MonitorService.class));
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
         this.unregisterReceiver(hiddenBroadcastReceiver);
-
         this.unregisterReceiver(innerRecevier);
         context = null;
     }

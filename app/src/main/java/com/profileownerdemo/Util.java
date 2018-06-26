@@ -17,6 +17,7 @@ import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Environment;
@@ -28,6 +29,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -415,7 +417,6 @@ public class Util {
         } catch (Exception e) {
             return false;
         }
-
     }
 
     private void startSelfFromPendingIntent(Context context) {

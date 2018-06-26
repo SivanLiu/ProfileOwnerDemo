@@ -1,7 +1,7 @@
 package com.profileownerdemo;
 
-import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -9,23 +9,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.LauncherApps;
-import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static android.app.admin.DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT;
 import static android.app.admin.DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED;
@@ -49,47 +44,23 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     private Button bt_send_across_intent;
     private Button startApp;
     private static final int REQUEST_PROVISION_MANAGED_PROFILE = 1;
-    private boolean multiUser = false;` ''
+    private boolean multiUser = false;
     private DevicePolicyManager manager = null;
     private static LauncherApps launcherApps = null;
     private UserManager userManager = null;
 
     IntentFilter intentFilter = new IntentFilter(ACROSS_INTENT_ACTION);
-
-    private HomeKeyLocker locker;
     private Activity activity;
-
-    public static final int FLAG_HOMEKEY_DISPATCHED = 0x80000000;
-    private Window window;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         activity = this;
-        if (!Util.isAppUsageStatAccessPermitted(this)) {
-            Intent usage = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-            startActivity(usage);
-        }
 
-        Log.e("ggg", "top package : " + Util.getTopPkgByUsage(this) + " intent = "+getIntent());
-        if (!this.getPackageName().equals(Util.getTopPkgByUsage(this))) {
-            finish();
-//            openLauncherUi();
-        } else {
-            openLauncherUi();
-            Log.e("ggggggg", "");
-        }
         manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         launcherApps = (LauncherApps) this.getSystemService(LAUNCHER_APPS_SERVICE);
         userManager = (UserManager) this.getSystemService(USER_SERVICE);
-
-        Log.e("gggg 1", "accounts = " + userManager.getUserProfiles().size());
-
-        AccountManager accountManager = (AccountManager) this.getSystemService(ACCOUNT_SERVICE);
-
-        Log.e("gggg 2", "accounts = " + accountManager.getAccounts().length);
-
         setProfile = findViewById(R.id.set_up_profile);
         setProfile.setOnClickListener(this);
         bt_enable_componment = findViewById(R.id.enable_componment);
@@ -115,62 +86,23 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
             }
         }
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            if (manager.isProfileOwnerApp(getApplicationContext().getPackageName())) {
-////                startProfileOWnerDesktop();
-////                Intent intent = new Intent(this, PermissionManager.class);
-////                startActivity(intent);
-//            } else {
-//                if (!multiUser) {
-//                    provisionManagedProfile(this);
-////                    startProfileOWnerDesktop();
-//                }
-//            }
-//        }
-
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (manager.isProfileOwnerApp(getApplicationContext().getPackageName())) {
+//                startProfileOWnerDesktop();
+//                Intent intent = new Intent(this, PermissionManager.class);
+//                startActivity(intent);
+            } else {
+                if (!multiUser) {
+                    provisionManagedProfile(this);
+//                    startProfileOWnerDesktop();
+                }
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-    }
-
-    private boolean openLauncherUi() {
-        ArrayList<String> list = getLauncherPkgToStart(this);
-        if (list == null || list.size() < 1) {
-            finish();
-            return false;
-        }
-        String pkg = list.get(0);
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        intent.setPackage(pkg);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        Log.e("gggg", "pkg = " + pkg);
-        try {
-            startActivity(intent);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
-    private static ArrayList<String> getLauncherPkgToStart(Context context) {
-        ArrayList<String> list = new ArrayList<>();
-
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        List<ResolveInfo> installedList = context.getApplicationContext()
-                .getPackageManager().queryIntentActivities(intent, 0);
-        for (ResolveInfo info : installedList) {
-            String pkg = info.activityInfo.packageName;
-            if (context.getPackageName().equals(pkg)) {
-                continue;
-            }
-            list.add(pkg);
-        }
-        return list;
     }
 
     @Override
@@ -266,24 +198,26 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        if (keyCode == KeyEvent.KEYCODE_BACK) {
-//            return true;
-//        }
-//        return super.onKeyDown(keyCode, event);
-//    }
-//
-//    @Override
-//    public void onBackPressed() {
-//        Log.e("ggg", "onBackPressed");
-//        super.onBackPressed();
-//    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return keyCode == KeyEvent.KEYCODE_BACK || super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 
     @Override
     protected void onPause() {
-        Log.e("ggg", "onPause");
         super.onPause();
+        ActivityManager activityManager = (ActivityManager) getApplicationContext()
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        if (null == activityManager) {
+            return;
+        }
+
+        activityManager.moveTaskToFront(getTaskId(), 0);
     }
 
     @Override

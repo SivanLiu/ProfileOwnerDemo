@@ -65,18 +65,18 @@ public class Main3Activity extends AppCompatActivity {
 //                List activityList = launcherApps.getActivityList(getPackageName(), userHandle);
 //                if (!activityList.isEmpty()) {
 //                    launcherApps.startMainActivity(((LauncherActivityInfo) activityList.get(0)).getComponentName(), userHandle, null, null);
-//                    finish();
+//                    showHome();
 //                    return;
 //                }
 //            }
 //            //            startActivity(new Intent(this, SetupActivity.class));
 //            pendIntent(this, "overall_analytics");
-//            finish();
+//            showHome();
 //        } else if (startLauncherActivity(this, getPackageName(), userHandle)) {
-//            finish();
+//            showHome();
 //        } else {
 //            pendIntent(this, "overall_analytics");
-//            finish();
+//            showHome();
 //        }
 
         deviceOwnerSet(this, savedInstanceState);
