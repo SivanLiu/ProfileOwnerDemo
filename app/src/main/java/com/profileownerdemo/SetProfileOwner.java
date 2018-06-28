@@ -9,18 +9,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.LauncherApps;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.support.annotation.RequiresApi;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import static android.app.admin.DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT;
 import static android.app.admin.DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED;
@@ -35,6 +42,10 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
             "com.profileownerdemo", "com.profileownerdemo.SetProfileOwner");
 
     public static final ComponentName onePiexlActivity = new ComponentName("com.profileownerdemo", "com.profileownerdemo.OnePiexlActivity");
+    private static final String FILE_PROVIDER_AUTHORITIES
+            = "com.profileownerdemo.fileprovider";
+
+    private static final String TYPE = "text";
 
     private Button setProfile;
     private Button bt_enable_componment;
@@ -76,6 +87,8 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         startApp = findViewById(R.id.startApp);
         startApp.setOnClickListener(this);
 
+        createFile();
+        showFileContent();
         UserHandle primaryUser = Process.myUserHandle();
 
         for (UserHandle uh : userManager.getUserProfiles()) {
@@ -86,18 +99,18 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (manager.isProfileOwnerApp(getApplicationContext().getPackageName())) {
-//                startProfileOWnerDesktop();
-//                Intent intent = new Intent(this, PermissionManager.class);
-//                startActivity(intent);
-            } else {
-                if (!multiUser) {
-                    provisionManagedProfile(this);
-//                    startProfileOWnerDesktop();
-                }
-            }
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            if (manager.isProfileOwnerApp(getApplicationContext().getPackageName())) {
+////                startProfileOWnerDesktop();
+////                Intent intent = new Intent(this, PermissionManager.class);
+////                startActivity(intent);
+//            } else {
+//                if (!multiUser) {
+//                    provisionManagedProfile(this);
+////                    startProfileOWnerDesktop();
+//                }
+//            }
+//        }
     }
 
     @Override
@@ -146,6 +159,17 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 Bundle bundle = new Bundle();
                 bundle.putString(PASS_DATA_KEY, "value....");
                 intent.putExtra(PASS_DATA, bundle);
+                Uri data;
+                File file = new File(this.getFilesDir() + "/text", "hello.txt");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    data = FileProvider.getUriForFile(this, FILE_PROVIDER_AUTHORITIES, file);
+                    // 给目标应用一个临时授权
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } else {
+                    data = Uri.fromFile(file);
+                }
+
+//                intent.setData(data);
                 try {
                     Util.setDisableComponent(this, new ComponentName(getPackageName(), OnePiexlActivity.class.getName()), true);
                     startActivity(intent);
@@ -174,10 +198,12 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 //                Intent showApps = new Intent(this, AppShowActivity.class);
 //                startActivity(showApps);
 
-                Intent intents = new Intent(this, OnePiexlActivity.class);
-                intents.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                this.startActivity(intents);
+//                Intent intents = new Intent(this, OnePiexlActivity.class);
+//                intents.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                this.startActivity(intents);
 //                Util.startLauncherActivity(launcherApps, this.getPackageName(), Util.getSecondeUserHandle(this));
+
+                shareFile();
                 break;
             default:
                 break;
@@ -247,6 +273,8 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                     BasicDeviceAdminReceiver.class.getName());
             intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME,
                     component);
+            intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_DISCLAIMER_CONTENT, "xxgggggggggffff");
+            intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI, "xxgggggggggffff");
         }
 
         if (intent.resolveActivity(activity.getPackageManager()) != null) {
@@ -255,6 +283,83 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         } else {
             Toast.makeText(activity, "Device provisioning is not enabled. Stopping.",
                     Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void createDir() {
+        File dir = new File(this.getExternalFilesDir(TYPE).getAbsolutePath());
+        if (!dir.exists() || !dir.isDirectory()) {
+            boolean mkdirs = dir.mkdirs();
+            Log.d(TAG, "createDir: photoDir created: " + mkdirs);
+        }
+    }
+
+    private void shareFile() {
+        Log.d(TAG, "shareFile: ");
+        Intent intent = new Intent();
+        ComponentName componentName = new ComponentName("com.profileownerdemo",
+                "com.profileownerdemo.SetProfileOwner");
+        intent.setComponent(componentName);
+        File file = new File(this.getFilesDir() + "/text", "hello.txt");
+//        File file = new File(mContext.getExternalFilesDir(null) + "/text", "hello.txt");
+//        File file = new File(Environment.getExternalStorageDirectory() + "/text", "hello.txt");
+        Log.d(TAG, "shareFile: file.exists(): " + file.exists());
+        Uri data;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            data = FileProvider.getUriForFile(this, FILE_PROVIDER_AUTHORITIES, file);
+            // 给目标应用一个临时授权
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } else {
+            data = Uri.fromFile(file);
+        }
+
+        intent.setData(data);
+        startActivity(intent);
+    }
+
+    private void createFile() {
+        File dir = new File(this.getFilesDir(), "text");
+//        File dir = new File(mContext.getExternalFilesDir(null), "text");
+        if (!dir.exists()) {
+            boolean dirResult = dir.mkdirs();
+            Log.d(TAG, "createFile: dirResult: " + dirResult);
+        }
+        File file = new File(dir, "hello.txt");
+        if (!file.exists()) {
+            try {
+                boolean fileResult = file.createNewFile();
+                Log.d(TAG, "createFile: fileResult: " + fileResult);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write("Hello World!".getBytes());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fileOutputStream != null) {
+                    fileOutputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void showFileContent() {
+        Intent intent = getIntent();
+        if (intent != null) {
+            Uri data = intent.getData();
+            if (data != null) {
+                Log.e(TAG, "ShowFileContent: data.toString(): " + data.toString());
+                Toast.makeText(this, data.toString(), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

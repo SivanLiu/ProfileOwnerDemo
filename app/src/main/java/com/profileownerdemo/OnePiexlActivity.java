@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,18 +54,19 @@ public class OnePiexlActivity extends Activity {
             Intent sendIntent = new Intent(this, MonitorService.class);
             sendIntent.setAction(PASS_INTENT_ACTION);
             sendIntent.putExtra(PASS_DATA, receiveBundle);
+            Toast.makeText(this, intent.getData().toString(), Toast.LENGTH_SHORT).show();
 //            sendBroadcast(sendIntent);
             this.startService(sendIntent);
-            Log.e(TAG, sendIntent + " sendBroadcast intent to ....");
+            Log.e(TAG, sendIntent + " sendBroadcast intent to .... " + intent.getData());
         }
 
-        if (showHome.get()) {
-            openLauncherUi();
-        } else {
-            Intent intents = new Intent(this, SetProfileOwner.class);
-            intents.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(intents);
-        }
+//        if (showHome.get()) {
+//            openLauncherUi();
+//        } else {
+//            Intent intents = new Intent(this, SetProfileOwner.class);
+//            intents.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//            startActivity(intents);
+//        }
 
         finish();
     }
