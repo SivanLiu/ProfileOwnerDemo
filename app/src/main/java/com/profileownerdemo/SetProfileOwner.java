@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -29,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_SKIP_ENCRYPTION;
 import static android.app.admin.DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT;
 import static android.app.admin.DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED;
 import static com.profileownerdemo.Util.ACROSS_INTENT_ACTION;
@@ -88,7 +90,6 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         startApp.setOnClickListener(this);
 
         createFile();
-        showFileContent();
         UserHandle primaryUser = Process.myUserHandle();
 
         for (UserHandle uh : userManager.getUserProfiles()) {
@@ -126,9 +127,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 break;
 
             case R.id.enable_componment:
-                Intent ss = new Intent(this, OnePiexlActivity.class);
-                startActivity(ss);
-//                Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, false);
+                Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, false);
                 break;
 
             case R.id.disable_componment:
@@ -168,16 +167,16 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 } else {
                     data = Uri.fromFile(file);
                 }
-
-//                intent.setData(data);
+                Log.e(TAG, "send data uri = " + data + " path = "+file.getAbsolutePath() + "  size = "+file.length());
+                intent.putExtra(Intent.EXTRA_STREAM, data);
                 try {
                     Util.setDisableComponent(this, new ComponentName(getPackageName(), OnePiexlActivity.class.getName()), true);
                     startActivity(intent);
                     if (Process.myUserHandle().hashCode() != 0) {
-                        Util.setApplicationHidden(this, manager, Util.getInstalledApps(this), true);
+                        Util.setApplicationHidden(this, manager, Util.getInstalledApps(this), false);
                     }
 
-                    Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, true);
+                    Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, false);
 
                     try {
                         Thread.sleep(1000);
@@ -273,8 +272,14 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                     BasicDeviceAdminReceiver.class.getName());
             intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME,
                     component);
+            Uri imageUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
+                    "://" + getResources().getResourcePackageName(R.mipmap.ic_launcher_round)
+                    + '/' + getResources().getResourceTypeName(R.mipmap.ic_launcher_round) + '/' + getResources().getResourceEntryName(R.mipmap.ic_launcher_round));
             intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_DISCLAIMER_CONTENT, "xxgggggggggffff");
-            intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI, "xxgggggggggffff");
+            intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI, imageUri);
+            intent.putExtra(EXTRA_PROVISIONING_SKIP_ENCRYPTION, true);
+            intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_SKIP_USER_CONSENT, true);
+
         }
 
         if (intent.resolveActivity(activity.getPackageManager()) != null) {
@@ -312,8 +317,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         } else {
             data = Uri.fromFile(file);
         }
-
-        intent.setData(data);
+        intent.putExtra(Intent.EXTRA_STREAM, data);
         startActivity(intent);
     }
 
@@ -336,7 +340,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         FileOutputStream fileOutputStream = null;
         try {
             fileOutputStream = new FileOutputStream(file);
-            fileOutputStream.write("Hello World!".getBytes());
+            fileOutputStream.write("Hello Worldsss ccccccccccccc vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv".getBytes());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -348,17 +352,6 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-        }
-    }
-
-    private void showFileContent() {
-        Intent intent = getIntent();
-        if (intent != null) {
-            Uri data = intent.getData();
-            if (data != null) {
-                Log.e(TAG, "ShowFileContent: data.toString(): " + data.toString());
-                Toast.makeText(this, data.toString(), Toast.LENGTH_SHORT).show();
             }
         }
     }

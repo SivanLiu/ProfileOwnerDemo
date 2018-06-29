@@ -61,7 +61,6 @@
             <intent-filter>
                 <action android:name="com.intent.across" />
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
