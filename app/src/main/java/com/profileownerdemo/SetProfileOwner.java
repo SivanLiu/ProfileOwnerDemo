@@ -164,13 +164,15 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                     data = FileProvider.getUriForFile(this, FILE_PROVIDER_AUTHORITIES, file);
                     // 给目标应用一个临时授权
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 } else {
                     data = Uri.fromFile(file);
                 }
-                Log.e(TAG, "send data uri = " + data + " path = "+file.getAbsolutePath() + "  size = "+file.length());
+                Log.e(TAG, "send data uri = " + data + " path = " + file.getAbsolutePath() + "  size = " + file.length());
                 intent.putExtra(Intent.EXTRA_STREAM, data);
                 try {
                     Util.setDisableComponent(this, new ComponentName(getPackageName(), OnePiexlActivity.class.getName()), true);
+//                    grantUriPermission(getPackageName(), data, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     startActivity(intent);
                     if (Process.myUserHandle().hashCode() != 0) {
                         Util.setApplicationHidden(this, manager, Util.getInstalledApps(this), false);
@@ -340,7 +342,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         FileOutputStream fileOutputStream = null;
         try {
             fileOutputStream = new FileOutputStream(file);
-            fileOutputStream.write("Hello Worldsss ccccccccccccc vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv".getBytes());
+            fileOutputStream.write("Hello Worldsss 9999".getBytes());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

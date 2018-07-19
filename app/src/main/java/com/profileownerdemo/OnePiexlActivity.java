@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Process;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.support.annotation.RequiresPermission;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Window;
@@ -95,8 +94,10 @@ public class OnePiexlActivity extends Activity {
             }
             FileOutputStream out = new FileOutputStream(downloadedCloudFile);
             IoUtil.write(is, out);
-            Log.e(TAG, Process.myUserHandle() + " fileName = " + nameIndex + " sizeIndex = " + sizeIndex + " fileName = " + filename +
-                    "  " + downloadedCloudFile.getAbsolutePath() + "  fileSize = " +filesize + "  content = "+is.available());
+
+
+            Log.e(TAG, Process.myUserHandle() + " nameIndex = " + nameIndex + " sizeIndex = " + sizeIndex + " fileName = " + filename +
+                    "  " + downloadedCloudFile.getAbsolutePath() + "  fileSize = " + filesize + "  content = " + new String(IoUtil.readFile(downloadedCloudFile)) + "  uri path = " + uri.getPath() + "  type : " + getContentResolver().getType(uri));
             return filename;
         } catch (Exception e) {
             e.printStackTrace();
