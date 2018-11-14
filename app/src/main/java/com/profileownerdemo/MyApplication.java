@@ -29,9 +29,9 @@ public class MyApplication extends Application {
                 if (reason != null) {
                     if (reason.equals(SYSTEM_DIALOG_REASON_HOME_KEY)) {
                         if ("com.profileownerdemo".equals(Util.getTopPkgByUsage(context))) {
-                            OnePiexlActivity.showHome.set(false);
+                            ProfileOwnerActivity.showHome.set(false);
                         } else {
-                            OnePiexlActivity.showHome.set(true);
+                            ProfileOwnerActivity.showHome.set(true);
                         }
                     } else if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
 //                        Toast.makeText(getApplicationContext(), "多任务键被监听", Toast.LENGTH_SHORT).show();
@@ -46,7 +46,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        this.context = getApplicationContext();
+        context = getApplicationContext();
         IntentFilter intentFilter = new IntentFilter();
 //        intentFilter.addAction(ACCROS_INTENT);
         intentFilter.addAction(PASS_INTENT_ACTION);

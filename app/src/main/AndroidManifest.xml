@@ -51,7 +51,7 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".OnePiexlActivity"
+                android:name=".ProfileOwnerActivity"
                 android:configChanges="keyboardHidden|orientation|screenSize|navigation|keyboard"
                 android:excludeFromRecents="true"
                 android:exported="true"
@@ -88,7 +88,6 @@
                 <category android:name="android.intent.category.INFO" />
             </intent-filter>
         </activity>
-        <activity android:name="com.island.Main3Activity" />
 
         <provider
                 android:name=".ShuttleProvider"

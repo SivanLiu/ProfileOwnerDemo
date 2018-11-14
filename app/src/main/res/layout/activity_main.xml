@@ -9,42 +9,70 @@
     <Button
             android:id="@+id/set_up_profile"
             android:text="SetProfile"
+            android:textAllCaps="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     <Button
             android:id="@+id/enable_componment"
             android:text="enable_componment"
+            android:textAllCaps="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     <Button
             android:id="@+id/disable_componment"
             android:text="disable_componment"
+            android:textAllCaps="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     <Button
             android:id="@+id/enable_across_intent"
             android:text="enable_across_intent"
+            android:textAllCaps="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     <Button
             android:id="@+id/disable_across_intent"
             android:text="disable_across_intent"
+            android:textAllCaps="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     <Button
             android:id="@+id/send_across_intent"
             android:text="send_across_intent"
+            android:textAllCaps="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     <Button
             android:id="@+id/startApp"
             android:text="StartApp"
+            android:textAllCaps="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    <Button
+            android:id="@+id/createUser"
+            android:text="createUser"
+            android:textAllCaps="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    <Button
+            android:id="@+id/switchUser"
+            android:text="switchUser"
+            android:textAllCaps="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    <Button
+            android:id="@+id/removeUser"
+            android:text="removeUser"
+            android:textAllCaps="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

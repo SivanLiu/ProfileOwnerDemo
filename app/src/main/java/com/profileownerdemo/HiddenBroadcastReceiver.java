@@ -22,10 +22,6 @@ public class HiddenBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-//        boolean startActivity = intent.getBooleanExtra(LAUNCH_MAIN_ACTIVITY, false);
-//        Log.e("ggg", "intent = " + intent.getAction() + "  launch_main = " + startActivity);
-//        Util.setDisableComponent(context, LAUNCHER_COMPONENT_NAME, false);
-
         String action = intent.getAction();
         if (TextUtils.isEmpty(action)) {
             Log.e(TAG, "action is null");

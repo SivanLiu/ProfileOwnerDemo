@@ -48,7 +48,7 @@ public class Util {
     public static final String PASS_DATA_KEY = "key";
     public static final String ACROSS_INTENT_ACTION = "com.intent.across";
     public static final String PASS_INTENT_ACTION = "com.intent.pass";
-    public static ComponentName componentName = new ComponentName("com.profileownerdemo", "com.profileownerdemo.OnePiexlActivity");
+    public static ComponentName componentName = new ComponentName("com.profileownerdemo", "com.profileownerdemo.ProfileOwnerActivity");
     private static long checkInterval = 2000L;
 
 
@@ -61,9 +61,6 @@ public class Util {
         final String rawSecondaryStoragesStr = System.getenv("SECONDARY_STORAGE");
         // Primary emulated SD-CARD
         final String rawEmulatedStorageTarget = System.getenv("EMULATED_STORAGE_TARGET");
-        Log.e("ggg", "rawExternalStorage = " + rawExternalStorage);
-        Log.e("ggg", "rawSecondaryStoragesStr = " + rawSecondaryStoragesStr);
-        Log.e("ggg", "rawEmulatedStorageTarget = " + rawEmulatedStorageTarget);
         if (TextUtils.isEmpty(rawEmulatedStorageTarget)) {
             // Device has physical external storage; use plain paths.
             if (TextUtils.isEmpty(rawExternalStorage)) {

@@ -33,8 +33,8 @@ import static com.profileownerdemo.Util.PASS_INTENT_ACTION;
 /**
  * Created by lyg on 2018/6/7.
  */
-public class OnePiexlActivity extends Activity {
-    private static final String TAG = "OnePiexlActivity";
+public class ProfileOwnerActivity extends Activity {
+    private static final String TAG = "ProfileOwnerActivity";
 
     public static AtomicBoolean showHome = new AtomicBoolean(false);
 

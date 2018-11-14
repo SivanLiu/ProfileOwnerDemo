@@ -5,11 +5,12 @@ import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_SKIP_ENCRYPTION;
 import static android.app.admin.DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT;
@@ -36,6 +38,7 @@ import static android.app.admin.DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAG
 import static com.profileownerdemo.Util.ACROSS_INTENT_ACTION;
 import static com.profileownerdemo.Util.PASS_DATA;
 import static com.profileownerdemo.Util.PASS_DATA_KEY;
+import static com.profileownerdemo.Util.componentName;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class SetProfileOwner extends AppCompatActivity implements View.OnClickListener {
@@ -43,7 +46,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     public static final ComponentName LAUNCHER_COMPONENT_NAME = new ComponentName(
             "com.profileownerdemo", "com.profileownerdemo.SetProfileOwner");
 
-    public static final ComponentName onePiexlActivity = new ComponentName("com.profileownerdemo", "com.profileownerdemo.OnePiexlActivity");
+    public static final ComponentName onePiexlActivity = new ComponentName("com.profileownerdemo", "com.profileownerdemo.ProfileOwnerActivity");
     private static final String FILE_PROVIDER_AUTHORITIES
             = "com.profileownerdemo.fileprovider";
 
@@ -56,9 +59,19 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     private Button bt_disable_across_intent;
     private Button bt_send_across_intent;
     private Button startApp;
+
+    private Button createUser;
+    private Button switchUser;
+    private Button removeUser;
+
+    private long newUserSerialNumber = 0;
+    private long ownerSerialNumber = 0;
+
+
     private static final int REQUEST_PROVISION_MANAGED_PROFILE = 1;
     private boolean multiUser = false;
     private DevicePolicyManager manager = null;
+    private UserManager userManager;
     private static LauncherApps launcherApps = null;
     private UserManager userManager = null;
 
@@ -72,6 +85,11 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         activity = this;
 
         manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+        userManager = (UserManager) getSystemService(USER_SERVICE);
+        if (Process.myUserHandle().hashCode() == 0) {
+            ownerSerialNumber = userManager.getSerialNumberForUser(Process.myUserHandle());
+        }
+
         launcherApps = (LauncherApps) this.getSystemService(LAUNCHER_APPS_SERVICE);
         userManager = (UserManager) this.getSystemService(USER_SERVICE);
         setProfile = findViewById(R.id.set_up_profile);
@@ -89,29 +107,13 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         startApp = findViewById(R.id.startApp);
         startApp.setOnClickListener(this);
 
-        createFile();
-        UserHandle primaryUser = Process.myUserHandle();
+        createUser = findViewById(R.id.createUser);
+        switchUser = findViewById(R.id.switchUser);
+        removeUser = findViewById(R.id.removeUser);
 
-        for (UserHandle uh : userManager.getUserProfiles()) {
-            if (uh.hashCode() != primaryUser.hashCode()) {
-                multiUser = true;
-//                launcherApps.startMainActivity(LAUNCHER_COMPONENT_NAME, uh, null, null);
-                return;
-            }
-        }
-
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            if (manager.isProfileOwnerApp(getApplicationContext().getPackageName())) {
-////                startProfileOWnerDesktop();
-////                Intent intent = new Intent(this, PermissionManager.class);
-////                startActivity(intent);
-//            } else {
-//                if (!multiUser) {
-//                    provisionManagedProfile(this);
-////                    startProfileOWnerDesktop();
-//                }
-//            }
-//        }
+        createUser.setOnClickListener(this);
+        switchUser.setOnClickListener(this);
+        removeUser.setOnClickListener(this);
     }
 
     @Override
@@ -140,6 +142,12 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 Log.e(TAG, "enable_across_intent admin = " + manager.isAdminActive(BasicDeviceAdminReceiver.getComponentName(this)));
 
                 if (manager.isAdminActive(BasicDeviceAdminReceiver.getComponentName(this))) {
+                    try {
+                        intentFilter.addDataType("*/*");
+                        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+                    } catch (IntentFilter.MalformedMimeTypeException e) {
+                        e.printStackTrace();
+                    }
                     manager.addCrossProfileIntentFilter(BasicDeviceAdminReceiver.getComponentName(this),
                             intentFilter, FLAG_MANAGED_CAN_ACCESS_PARENT | FLAG_PARENT_CAN_ACCESS_MANAGED);
                     Log.e(TAG, "enable_across_intent");
@@ -168,26 +176,11 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 } else {
                     data = Uri.fromFile(file);
                 }
-                Log.e(TAG, "send data uri = " + data + " path = " + file.getAbsolutePath() + "  size = " + file.length());
-                intent.putExtra(Intent.EXTRA_STREAM, data);
+                intent.setData(data);
+
                 try {
-                    Util.setDisableComponent(this, new ComponentName(getPackageName(), OnePiexlActivity.class.getName()), true);
-//                    grantUriPermission(getPackageName(), data, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    transferIntentToProfile(this, intent);
                     startActivity(intent);
-                    if (Process.myUserHandle().hashCode() != 0) {
-                        Util.setApplicationHidden(this, manager, Util.getInstalledApps(this), false);
-                    }
-
-                    Util.setDisableComponent(this, LAUNCHER_COMPONENT_NAME, false);
-
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    Util.setDisableComponent(this, new ComponentName(getPackageName(), OnePiexlActivity.class.getName()), false);
-                    finish();
                     Log.e(TAG, Process.myUserHandle().toString() + " send_across_intent...");
                 } catch (ActivityNotFoundException e) {
                     e.printStackTrace();
@@ -199,12 +192,27 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
 //                Intent showApps = new Intent(this, AppShowActivity.class);
 //                startActivity(showApps);
 
-//                Intent intents = new Intent(this, OnePiexlActivity.class);
+//                Intent intents = new Intent(this, ProfileOwnerActivity.class);
 //                intents.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //                this.startActivity(intents);
 //                Util.startLauncherActivity(launcherApps, this.getPackageName(), Util.getSecondeUserHandle(this));
 
                 shareFile();
+                break;
+
+            case R.id.createUser:
+                UserHandle userHandle = manager.createAndManageUser(componentName, "Owner", componentName, null, 0);
+                newUserSerialNumber = userManager.getSerialNumberForUser(userHandle);
+                break;
+            case R.id.switchUser:
+                if (Process.myUserHandle().hashCode() == 0) {
+                    manager.switchUser(componentName, userManager.getUserForSerialNumber(newUserSerialNumber));
+                } else {
+                    manager.switchUser(componentName, userManager.getUserForSerialNumber(ownerSerialNumber));
+                }
+                break;
+            case R.id.removeUser:
+                manager.removeUser(componentName, userManager.getUserForSerialNumber(newUserSerialNumber));
                 break;
             default:
                 break;
@@ -274,14 +282,8 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                     BasicDeviceAdminReceiver.class.getName());
             intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME,
                     component);
-            Uri imageUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE +
-                    "://" + getResources().getResourcePackageName(R.mipmap.ic_launcher_round)
-                    + '/' + getResources().getResourceTypeName(R.mipmap.ic_launcher_round) + '/' + getResources().getResourceEntryName(R.mipmap.ic_launcher_round));
-            intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_DISCLAIMER_CONTENT, "xxgggggggggffff");
-            intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI, imageUri);
             intent.putExtra(EXTRA_PROVISIONING_SKIP_ENCRYPTION, true);
             intent.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_SKIP_USER_CONSENT, true);
-
         }
 
         if (intent.resolveActivity(activity.getPackageManager()) != null) {
@@ -355,6 +357,22 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+
+    private void transferIntentToProfile(Context context, Intent intent) {
+        PackageManager pm = context.getPackageManager();
+        List<ResolveInfo> info = pm.queryIntentActivities(intent, 0);
+        ResolveInfo profileResolveInfo = null;
+        for (ResolveInfo resolveInfo : info) {
+            if ("android".equals(resolveInfo.activityInfo.packageName)) {
+                profileResolveInfo = resolveInfo;
+            }
+        }
+
+        if (null != profileResolveInfo) {
+            intent.setComponent(new ComponentName(profileResolveInfo.activityInfo.packageName, profileResolveInfo.activityInfo.name));
         }
     }
 }
