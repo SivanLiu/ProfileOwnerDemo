@@ -1,10 +1,14 @@
 package com.profileownerdemo;
 
 import android.app.Application;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Process;
+import android.os.UserManager;
+import android.util.Log;
 
 import static com.profileownerdemo.Util.PASS_INTENT_ACTION;
 
@@ -13,8 +17,11 @@ import static com.profileownerdemo.Util.PASS_INTENT_ACTION;
  */
 public class MyApplication extends Application {
     private HiddenBroadcastReceiver hiddenBroadcastReceiver = new HiddenBroadcastReceiver();
-
+    private IntentFilter acrossUser;
     private static Context context;
+
+    private DevicePolicyManager policyManager;
+    private UserManager userManager;
 
     class InnerRecevier extends BroadcastReceiver {
         final String SYSTEM_DIALOG_REASON_KEY = "reason";
@@ -41,11 +48,25 @@ public class MyApplication extends Application {
         }
     }
 
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.e("ggg", "intent = " + intent.getAction() + "  current user = " + Process.myUserHandle());
+            if (Process.myUserHandle().hashCode() == 0) {
+                Log.e("ggg", "switch user to owner");
+                policyManager.switchUser(BasicDeviceAdminReceiver.getComponentName(context), userManager.getUserForSerialNumber(0));
+            }
+        }
+    };
+
     private InnerRecevier innerRecevier = new InnerRecevier();
 
     @Override
     public void onCreate() {
         super.onCreate();
+        policyManager = (DevicePolicyManager) getSystemService(DEVICE_POLICY_SERVICE);
+        userManager = (UserManager) getSystemService(USER_SERVICE);
+
         context = getApplicationContext();
         IntentFilter intentFilter = new IntentFilter();
 //        intentFilter.addAction(ACCROS_INTENT);

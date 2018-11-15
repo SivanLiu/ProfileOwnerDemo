@@ -1,7 +1,6 @@
 package com.profileownerdemo;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -38,7 +37,6 @@ import static android.app.admin.DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAG
 import static com.profileownerdemo.Util.ACROSS_INTENT_ACTION;
 import static com.profileownerdemo.Util.PASS_DATA;
 import static com.profileownerdemo.Util.PASS_DATA_KEY;
-import static com.profileownerdemo.Util.componentName;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class SetProfileOwner extends AppCompatActivity implements View.OnClickListener {
@@ -63,6 +61,7 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     private Button createUser;
     private Button switchUser;
     private Button removeUser;
+    private Button sendAcrossUserIntent;
 
     private long newUserSerialNumber = 0;
     private long ownerSerialNumber = 0;
@@ -73,21 +72,27 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     private DevicePolicyManager manager = null;
     private UserManager userManager;
     private static LauncherApps launcherApps = null;
-    private UserManager userManager = null;
 
     IntentFilter intentFilter = new IntentFilter(ACROSS_INTENT_ACTION);
     private Activity activity;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         activity = this;
+        Log.e("ggg", "receive intent " + getIntent());
 
         manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         userManager = (UserManager) getSystemService(USER_SERVICE);
         if (Process.myUserHandle().hashCode() == 0) {
             ownerSerialNumber = userManager.getSerialNumberForUser(Process.myUserHandle());
+        } else {
+            if (manager.isAdminActive(BasicDeviceAdminReceiver.getComponentName(this))) {
+                manager.addCrossProfileIntentFilter(BasicDeviceAdminReceiver.getComponentName(this), new IntentFilter("com.intent.across"), FLAG_MANAGED_CAN_ACCESS_PARENT | FLAG_PARENT_CAN_ACCESS_MANAGED);
+                manager.enableSystemApp(BasicDeviceAdminReceiver.getComponentName(this), "com.huawei.appmarket");
+            }
         }
 
         launcherApps = (LauncherApps) this.getSystemService(LAUNCHER_APPS_SERVICE);
@@ -110,10 +115,20 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
         createUser = findViewById(R.id.createUser);
         switchUser = findViewById(R.id.switchUser);
         removeUser = findViewById(R.id.removeUser);
+        sendAcrossUserIntent = findViewById(R.id.send_across_user_intent);
 
         createUser.setOnClickListener(this);
         switchUser.setOnClickListener(this);
         removeUser.setOnClickListener(this);
+        sendAcrossUserIntent.setOnClickListener(this);
+
+        boolean isProfileOwner = manager.isProfileOwnerApp(this.getPackageName());
+        Log.e("ggg", "current user = " + Process.myUserHandle() + " isProfileOwner = " + isProfileOwner);
+
+        boolean isDeviceOwner = manager.isDeviceOwnerApp(getPackageName());
+        Log.e("ggg", "current user = " + Process.myUserHandle() + " isDeviceOwner = " + isDeviceOwner);
+
+        Log.e("ggg", "owner user serial number = " + userManager.getSerialNumberForUser(Process.myUserHandle()));
     }
 
     @Override
@@ -201,18 +216,28 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
                 break;
 
             case R.id.createUser:
-                UserHandle userHandle = manager.createAndManageUser(componentName, "Owner", componentName, null, 0);
+                UserHandle userHandle = manager.createAndManageUser(BasicDeviceAdminReceiver.getComponentName(this), "Owner", BasicDeviceAdminReceiver.getComponentName(this), null, 0);
                 newUserSerialNumber = userManager.getSerialNumberForUser(userHandle);
+                Log.e("ggg", "crate user serial number = " + newUserSerialNumber);
                 break;
             case R.id.switchUser:
                 if (Process.myUserHandle().hashCode() == 0) {
-                    manager.switchUser(componentName, userManager.getUserForSerialNumber(newUserSerialNumber));
+                    manager.switchUser(BasicDeviceAdminReceiver.getComponentName(this), userManager.getUserForSerialNumber(newUserSerialNumber));
                 } else {
-                    manager.switchUser(componentName, userManager.getUserForSerialNumber(ownerSerialNumber));
+                    manager.switchUser(BasicDeviceAdminReceiver.getComponentName(this), userManager.getUserForSerialNumber(0));
                 }
                 break;
             case R.id.removeUser:
-                manager.removeUser(componentName, userManager.getUserForSerialNumber(newUserSerialNumber));
+                manager.removeUser(BasicDeviceAdminReceiver.getComponentName(this), userManager.getUserForSerialNumber(newUserSerialNumber));
+                manager.clearDeviceOwnerApp(getPackageName());
+                break;
+
+            case R.id.send_across_user_intent:
+                Intent userIntent = new Intent();
+                userIntent.setAction("com.intent.across");
+                userIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(userIntent);
+
                 break;
             default:
                 break;
@@ -246,13 +271,13 @@ public class SetProfileOwner extends AppCompatActivity implements View.OnClickLi
     @Override
     protected void onPause() {
         super.onPause();
-        ActivityManager activityManager = (ActivityManager) getApplicationContext()
-                .getSystemService(Context.ACTIVITY_SERVICE);
-        if (null == activityManager) {
-            return;
-        }
-
-        activityManager.moveTaskToFront(getTaskId(), 0);
+//        ActivityManager activityManager = (ActivityManager) getApplicationContext()
+//                .getSystemService(Context.ACTIVITY_SERVICE);
+//        if (null == activityManager) {
+//            return;
+//        }
+//
+//        activityManager.moveTaskToFront(getTaskId(), 0);
     }
 
     @Override

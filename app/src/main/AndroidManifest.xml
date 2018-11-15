@@ -43,6 +43,7 @@
             android:theme="@style/AppTheme">
         <activity android:name=".SetProfileOwner">
             <intent-filter>
+                <action android:name="ggg.across.user" />
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="com.second.intent" />
                 <!--<category android:name="android.intent.category.HOME" />-->

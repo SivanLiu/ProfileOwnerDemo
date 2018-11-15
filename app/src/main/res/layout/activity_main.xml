@@ -76,4 +76,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+    <Button
+            android:id="@+id/send_across_user_intent"
+            android:text="send_across_user_intent"
+            android:textAllCaps="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
 </LinearLayout>

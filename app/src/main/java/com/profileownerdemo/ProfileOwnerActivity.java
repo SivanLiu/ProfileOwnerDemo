@@ -67,13 +67,13 @@ public class ProfileOwnerActivity extends Activity {
             this.startService(sendIntent);
         }
 
-//        if (showHome.get()) {
-//            openLauncherUi();
-//        } else {
-//            Intent intents = new Intent(this, SetProfileOwner.class);
-//            intents.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//            startActivity(intents);
-//        }
+        if (showHome.get()) {
+            openLauncherUi();
+        } else {
+            Intent intents = new Intent(this, SetProfileOwner.class);
+            intents.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intents);
+        }
 
         finish();
     }
